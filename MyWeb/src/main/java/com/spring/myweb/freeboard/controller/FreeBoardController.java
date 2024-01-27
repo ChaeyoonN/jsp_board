@@ -16,10 +16,12 @@ import com.spring.myweb.freeboard.dto.response.FreeContentResponseDTO;
 import com.spring.myweb.freeboard.service.IFreeBoardService;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Controller
 @RequestMapping("/freeboard")
 @RequiredArgsConstructor
+@Slf4j
 public class FreeBoardController {
 	
 	private final IFreeBoardService service;
@@ -28,22 +30,38 @@ public class FreeBoardController {
 	@GetMapping("/freeList")
 	public void freeList(Page page, Model model) {
 		System.out.println("/freeboard/freeList: GET!");
+		log.info("Page :{}",page);
 		
 		PageCreator creator;
 		int totalCount = service.getTotal(page);
-		if(totalCount == 0) {
+		model.addAttribute("msg", "showList");
+		
+		if(page.getCondition() != null && page.getKeyword() != null) { // 검색한 경우
+			page.setSearchFlag(true);
+			if(totalCount == 0) { // 검색 결과 없음
+				model.addAttribute("msg", "searchFail");
+			}
+		}
+		
+		if(totalCount == 0) { // 게시글 없는경우
+			if(!page.isSearchFlag()) { // 원래 게시글 없음
+				model.addAttribute("msg", "zeroBoard");
+			} else { 
+				model.addAttribute("msg", "searchFail");
+			}
 			page.setKeyword(null);
 			page.setCondition(null);
 			creator = new PageCreator(page, service.getTotal(page));
-			model.addAttribute("msg", "searchFail");
+			
 		}else {
 			creator = new PageCreator(page, totalCount);
 			
-		}
-		
+		} // if문 끝
 		
 		model.addAttribute("boardList", service.getList(page)); //void이므로 freeList.jsp로 전달
+		model.addAttribute("totalCount", totalCount);
 		model.addAttribute("pc", creator);
+//		model.addAttribute("msg", "showList");
 	}
 	
 	//글쓰기 페이지를 열어주는 메서드

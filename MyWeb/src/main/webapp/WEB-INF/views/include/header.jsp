@@ -14,7 +14,7 @@ prefix="c" %>
       name="viewport"
       content="width=device-width, initial-scale=1"
     />
-    <title>인덱스를 만들어 보자</title>
+    <title>게시판</title>
 
     <link
       href="${pageContext.request.contextPath }/css/bootstrap.css"

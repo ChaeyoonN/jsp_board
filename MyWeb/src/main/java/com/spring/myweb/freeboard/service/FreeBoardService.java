@@ -2,6 +2,7 @@ package com.spring.myweb.freeboard.service;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import org.springframework.stereotype.Service;
 
@@ -20,14 +21,18 @@ import lombok.RequiredArgsConstructor;
 public class FreeBoardService implements IFreeBoardService {
 	
 	private final IFreeBoardMapper mapper;
-	
+	private final BCryptPasswordEncoder encoder;
 
 	@Override
 	public void regist(FreeRegistRequestDTO dto) {
+		String securePw = encoder.encode(dto.getPassword());
+		dto.setPassword(securePw);
+		
 		mapper.regist(FreeBoard.builder()
 						.title(dto.getTitle())
 						.content(dto.getContent())
 						.writer(dto.getWriter())
+						.password(dto.getPassword())
 						.build());
 
 	}

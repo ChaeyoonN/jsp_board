@@ -365,14 +365,16 @@ section {
 
 /*input 요소의 넓이만 선택*/
 .t-control input {
-	width: 200px;
+	/* width: 200px; */
 	display: inline; /*인라인요소로 변경한다*/
+	/* font-size: 13px; */
 }
 
 /*개발자 도구에서 input-sm의 정렬을 푼다*/
 .t-control .input-sm {
 	height: auto;
 	line-height: normal;
+	/* font-size: 13px; */
 }
 /*td의 아래만 밑줄*/
 .t-control td {
@@ -384,12 +386,25 @@ section {
 	margin: 30px auto; /*박스의 가운데정렬*/
 	width: 50%; /*크기 50%*/
 }
+
+.password-instruction{
+	display: block;
+}
+
+.password-instruction small {
+    display: block; /* 블록 레벨 요소로 만들어 줍니다 (새 줄에서 시작) */
+    font-size: 0.8em; /* 작은 글씨 크기 */
+    color: #6c757d; /* 글씨 색상 */
+    margin-top: 5px; /* input과의 간격 */
+}
+
 /*==========자게 상세보기==========*/
 .write-wrap {
 	margin: 0 auto;
 	/*가운대 정렬방법 하지만 적용되지 않는다. 이유는 col클래스들이 float:left를 들고 있기 때문*/
-	float: none; /*플롯을 해제한다. 가운대정렬이 들어간다*/
+	float: none; /*플롯을 해제한다. 가운데정렬이 들어간다*/
 }
+
 /*=======댓글========*/
 .reply-wrap {
 	background-color: #f5f5f5;

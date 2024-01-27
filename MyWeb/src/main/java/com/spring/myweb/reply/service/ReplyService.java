@@ -70,7 +70,7 @@ public class ReplyService implements IReplyService {
 
 	@Override
 	public String update(ReplyUpdateRequestDTO dto) {
-		if(encoder.matches(dto.getReplyPw(), mapper.pwCheck(dto.getReplyNo()))) {
+		if(encoder.matches(dto.getReplyPw(), mapper.pwCheck(dto.getRno()))) {
 			mapper.update(dto.toEntity(dto));
 			return "updateSuccess";
 		}else {

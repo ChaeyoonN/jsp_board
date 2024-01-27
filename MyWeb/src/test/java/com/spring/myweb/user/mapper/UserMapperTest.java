@@ -31,8 +31,10 @@ public class UserMapperTest {
 //        				.userPhone1("010")
 //        				.userPhone2("1234-5678")
         				.userEmail1("abnn")
+//        				
         				.userEmail2("naver.com")
-        				.addrBasic("서울 서대문구 가재울로 42")
+        				
+//        				.addrBasic("서울 서대문구 가재울로 42")
 //        				.addrDetail("102-206")
 //        				.addrZipNum("03849")
         				.build()
@@ -81,9 +83,9 @@ public class UserMapperTest {
     			.userName("리디")
     			.userEmail1("lidy01")
     			.userEmail2("gmail.com")
-    			.addrBasic("서울특별시 강동구")
-    			.addrDetail("121-196")
-    			.addrZipNum("03719")
+//    			.addrBasic("서울특별시 강동구")
+//    			.addrDetail("121-196")
+//    			.addrZipNum("03719")
     			.build();
     
         mapper.updateUser(user);

@@ -2,9 +2,10 @@ package com.spring.myweb.freeboard.entity;
 /*
  CREATE TABLE freeboard(
     bno NUMBER PRIMARY KEY,
-    title VARCHAR2(300) NOT NULL,
-    writer VARCHAR2(50) NOT NULL,
-    content VARCHAR2(3000),
+    title VARCHAR2(100) NOT NULL,
+    writer VARCHAR2(100) NOT NULL, 
+    content VARCHAR2(4000),
+    password VARCHAR2(50)
     reg_date DATE DEFAULT sysdate,
     update_date DATE DEFAULT NULL
 );
@@ -37,6 +38,7 @@ public class FreeBoard {
 	private String title;
 	private String writer;
 	private String content;
+	private String password;
 	private LocalDateTime regDate;
 	private LocalDateTime updateDate;
 }

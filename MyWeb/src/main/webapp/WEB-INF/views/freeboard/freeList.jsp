@@ -1,10 +1,14 @@
 ﻿<%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>  
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
+
     
     <%@ include file="../include/header.jsp" %>
     
     
+    <!-- <c:set var="pageCount" value="${pc.articleTotalCount / 10}" /> -->
     <section>
         <div class="container-fluid">
             <div class="row">
@@ -18,18 +22,31 @@
                     <!--form select를 가져온다 -->
             <form action="${pageContext.request.contextPath}/freeboard/freeList">
 		    		<div class="search-wrap">
+
                        <button type="submit" class="btn btn-info search-btn">검색</button>
                        <input type="text" name="keyword" class="form-control search-input" value="${pc.page.keyword}">
+
                        <select name="condition" class="form-control search-select">
                             <option value="title" ${pc.page.condition == 'title' ? 'selected':''}>제목</option>
                             <option value="content" ${pc.page.condition == 'content' ? 'selected':''}>내용</option>
                             <option value="writer" ${pc.page.condition == 'writer' ? 'selected':''}>작성자</option>
                             <option value="titleContent" ${pc.page.condition == 'titleContent' ? 'selected':''}>제목+내용</option>
                        </select>
+
+                    </div>
+
+                    <div class="search-wrap countDiv" var="vo" items="${boardList}" varStatus="status">
+                        <div>게시글 수: <span>${totalCount}</span>건</div>
                     </div>
 		    </form>
                    
                     <table class="table table-bordered">
+                        <colgroup>
+                            <col style="width:10%;">
+                            <col style="width:55%;">
+                            <col style="width:15%;">
+                            <col style="width:20%;">
+                        </colgroup>
                         <thead>
                             <tr>
                                 <th>번호</th>
@@ -38,19 +55,47 @@
                                 <th>등록일</th>
                             </tr>
                         </thead>
+                        
                         <tbody>
-                        	<c:forEach var="vo" items="${boardList}">
+                            <c:if test="${msg eq 'showList'}">
+                            <c:set var="num" value="${totalCount - ((pc.page.pageNo-1) * 10)}"/>
+                        	<c:forEach var="vo" items="${boardList}" varStatus="status">
 	                            <tr>
-	                                <td>${vo.bno}</td>
-	                                <td><a href="${pageContext.request.contextPath}/freeboard/content?bno=${vo.bno}&pageNo=${pc.page.pageNo}&amount=${pc.page.amount}&keyword=${pc.page.keyword}&condition=${pc.page.condition}">${vo.title}</a></td>
-	                                <td>${vo.writer}</td>
+                                    <td>${num}</td>
+                                    <!-- <td>${boardList.size() - status.index}</td> -->
+	                                <td style="display: none;">${vo.bno}</td>
+	                                <td>
+                                        <a href="${pageContext.request.contextPath}/freeboard/content?bno=${vo.bno}&pageNo=${pc.page.pageNo}&amount=${pc.page.amount}&keyword=${pc.page.keyword}&condition=${pc.page.condition}"
+                                    >
+                                        <span>
+                                            <c:out value="${vo.title}" escapeXml="true" />
+                                        </span>
+                                        </a>
+                                    </td>
+	                                <td><c:out value="${vo.writer}" escapeXml="true" /></td>
 	                                <td>${vo.date}</td>
 	                            </tr>
+                                <c:set var="num" value="${num-1}"></c:set>
                             </c:forEach>
+                            </c:if>
+
+                            <c:if test="${msg eq 'searchFail'}">
+                                <div>
+                                    <h1>검색 결과가 없습니다.</h1>
+                                </div>
+                            </c:if>
+
+                            <c:if test="${msg eq 'zeroBoard'}">
+                                <div>
+                                    <h1>게시글이 존재하지 않는 게시판입니다. 게시글을 등록해 주세요!</h1>
+                                </div>
+                            </c:if>
+
                         </tbody>
                         
                     </table>
 
+                    
 
                     <!--페이지 네이션을 가져옴-->
 		    <form action="${pageContext.request.contextPath}/freeboard/freeList" name="pageForm">
@@ -58,6 +103,7 @@
 	                    <hr>
 	                    <ul id="pagination" class="pagination pagination-sm">
 	                        <c:if test="${pc.prev}">
+                                <li><a href="#" data-pagenum="1">처음</a></li>
 	                        	<li><a href="#" data-pagenum="${pc.begin-1}">이전</a></li>
 	                        </c:if>
 	                        
@@ -67,6 +113,8 @@
 	                        
 	                        <c:if test="${pc.next}">
 	                        	<li><a href="#" data-pagenum="${pc.end+1}">다음</a></li>
+                                
+                                <li><a href="#" data-pagenum="">끝</a></li>
 	                        </c:if>
 	                    </ul>
 	                    <button type="button" class="btn btn-info" onclick="location.href='${pageContext.request.contextPath}/freeboard/freeRegist'">글쓰기</button>
@@ -90,6 +138,18 @@
         //브라우저 창이 로딩이 완료된 후에 실행할 것을 보장하는 이벤트.
         window.onload = function() {
             
+            console.log('msg: ', '${msg}');
+
+            var totalItemCount = parseInt(document.querySelector('.countDiv>div>span').textContent, 10);
+            var itemsPerPage = parseInt(document.pageForm.amount.value, 10);
+            var totalPageCount = Math.ceil(totalItemCount / itemsPerPage);
+
+            // '끝' 링크에 총 페이지 수를 설정합니다.
+            var lastPageLink = document.querySelector('a[data-pagenum=""]');
+            if (lastPageLink) {
+                lastPageLink.setAttribute('data-pagenum', totalPageCount);
+            }
+
             //사용자가 페이지 관련 버튼을 클릭했을 때 (이전, 다음, 1, 2, 3...)
             //a태그의 href에다가 각각 다른 url을 작성해서 요청을 보내기가 귀찮다.
             //클릭한 버튼이 무엇인지를 확인해서 그 버튼에 맞는 페이지 정보를 
@@ -116,7 +176,12 @@
 
             const msg = '${msg}';
             if(msg === 'searchFail'){
-                alert('검색 결과가 없었습니다.');
+            	
+                // alert('검색 결과가 없었습니다.');
+            }
+            if(msg === 'zeroBoard'){
+            	
+                // alert('검색 결과가 없었습니다.');
             }
 
 

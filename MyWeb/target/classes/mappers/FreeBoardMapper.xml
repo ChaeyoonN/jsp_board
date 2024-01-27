@@ -31,8 +31,14 @@
 	
 	<insert id="regist">
 		INSERT INTO freeboard
-		(bno, title, writer, content)
-		VALUES(freeboard_seq.NEXTVAL, #{title}, #{writer}, #{content})
+		(bno, title, writer, content, password)
+		VALUES(
+			freeboard_seq.NEXTVAL, 
+			#{title},
+			#{writer},
+		  	#{content},
+		   #{password}
+		   )
 	</insert>
 	
 	<select id="getList" resultType="freeboard"> 

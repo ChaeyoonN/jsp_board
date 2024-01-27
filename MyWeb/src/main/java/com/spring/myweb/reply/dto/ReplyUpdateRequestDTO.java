@@ -17,13 +17,13 @@ import lombok.ToString;
 @Builder
 public class ReplyUpdateRequestDTO {
 
-	private int replyNo;
+	private int rno;
 	private String replyPw;
 	private String replyText;
 	
 	public Reply toEntity(ReplyUpdateRequestDTO dto) {
 		return Reply.builder()
-					.replyNo(this.replyNo)
+					.rno(this.rno)
 					.replyPw(this.replyPw)
 					.replyText(this.replyText)
 					.build();

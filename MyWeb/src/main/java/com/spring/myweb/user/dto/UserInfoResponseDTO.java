@@ -21,13 +21,13 @@ import lombok.ToString;
 public class UserInfoResponseDTO {
 	//필드
 	private String userName;
-	private String userPhone1;
-	private String userPhone2;
+//	private String userPhone1;
+//	private String userPhone2;
 	private String userEmail1;
 	private String userEmail2;
-	private String addrBasic;
-	private String addrDetail;
-	private String addrZipNum;
+//	private String addrBasic;
+//	private String addrDetail;
+//	private String addrZipNum;
 	
 	private List<FreeListResponseDTO> userBoardList;
 	
@@ -44,13 +44,13 @@ public class UserInfoResponseDTO {
 		
 		return UserInfoResponseDTO.builder()
 				.userName(user.getUserName())
-				.userPhone1(user.getUserPhone1())
-				.userPhone2(user.getUserPhone2())
+//				.userPhone1(user.getUserPhone1())
+//				.userPhone2(user.getUserPhone2())
 				.userEmail1(user.getUserEmail1())
 				.userEmail2(user.getUserEmail2())
-				.addrBasic(user.getAddrBasic())
-				.addrDetail(user.getAddrDetail())
-				.addrZipNum(user.getAddrZipNum())
+//				.addrBasic(user.getAddrBasic())
+//				.addrDetail(user.getAddrDetail())
+//				.addrZipNum(user.getAddrZipNum())
 				.userBoardList(list) // FreeListResponseDTO로 이뤄진 리스트(list)를 
 				.build(); 			// userBoardList로 세팅.
 				

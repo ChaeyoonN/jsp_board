@@ -19,6 +19,7 @@ public class FreeContentResponseDTO {
 	private int bno;
 	private String title;
 	private String writer;
+	private String password;
 	private String content;
 	private String date;
 	
@@ -28,6 +29,7 @@ public class FreeContentResponseDTO {
 		this.bno = board.getBno();
 		this.title = board.getTitle();
 		this.writer = board.getWriter();
+		this.password = board.getPassword();
 		this.content = board.getContent();
 		
 		this.date = board.getUpdateDate()==null? 

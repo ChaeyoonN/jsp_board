@@ -38,7 +38,7 @@ CREATE SEQUENCE reply_seq
 @Builder
 public class Reply {
 	
-	private int replyNo;
+	private int rno;
 	private int bno;
 	
 	private String replyText;

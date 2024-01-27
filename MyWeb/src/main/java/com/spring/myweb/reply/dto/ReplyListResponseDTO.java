@@ -12,14 +12,14 @@ import lombok.ToString;
 @Getter @ToString @EqualsAndHashCode
 public class ReplyListResponseDTO {
 	
-	private int replyNo;
+	private int rno;
 	private String replyWriter;
 	private String replyText;
 	private String date;
 	
 	
 	public ReplyListResponseDTO(Reply reply) {
-		this.replyNo = reply.getReplyNo();
+		this.rno = reply.getRno();
 		this.replyWriter = reply.getReplyWriter();
 		this.replyText = reply.getReplyText();
 		

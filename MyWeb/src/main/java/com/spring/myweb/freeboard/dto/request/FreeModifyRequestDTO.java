@@ -1,5 +1,7 @@
 package com.spring.myweb.freeboard.dto.request;
 
+import java.time.LocalDateTime;
+
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -15,8 +17,11 @@ public class FreeModifyRequestDTO {
 	private int bno;
 	
 	private String writer;
+	private String password;
 	
 	private String title;
 	private String content;
+	
+	private LocalDateTime date;
 	
 }

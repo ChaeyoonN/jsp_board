@@ -13,7 +13,7 @@ pageEncoding="UTF-8"%> <%@ include file="../include/header.jsp" %>
         >
           <div class="form-group">
             <!--사용자클래스선언-->
-            <label for="id">아이디</label>
+            <label for="id">아이디 (영문 포함 7~12자)</label>
             <div class="input-group">
               <!--input2탭의 input-addon을 가져온다 -->
               <input
@@ -21,7 +21,7 @@ pageEncoding="UTF-8"%> <%@ include file="../include/header.jsp" %>
                 class="form-control"
                 name="userId"
                 id="userId"
-                placeholder="아이디를 (영문포함 8~12자 이상)"
+                placeholder="아이디를 (영문 포함 7~12자 이상)"
               />
               <div class="input-group-addon">
                 <button
@@ -38,13 +38,13 @@ pageEncoding="UTF-8"%> <%@ include file="../include/header.jsp" %>
           </div>
           <div class="form-group">
             <!--기본 폼그룹을 가져온다-->
-            <label for="password">비밀번호</label>
+            <label for="password">비밀번호 (영문 대/소문자, 숫자, 특수문자 중 2가지 이상 조합 8자 이상)</label>
             <input
               type="password"
               name="userPw"
               class="form-control"
               id="userPw"
-              placeholder="비밀번호 (영 대/소문자, 숫자 조합 8~16자 이상)"
+              placeholder="비밀번호 (영문 대/소문자, 숫자, 특수문자 중 2가지 이상 조합 8자 이상)"
             />
             <span id="msgPw"></span
             ><!--자바스크립트에서 추가-->
@@ -72,7 +72,7 @@ pageEncoding="UTF-8"%> <%@ include file="../include/header.jsp" %>
           </div>
           <!--input2탭의 input-addon을 가져온다 -->
           <div class="form-group">
-            <label for="hp">휴대폰번호</label>
+            <!-- <label for="hp">휴대폰번호</label>
             <div class="input-group">
               <select
                 name="userPhone1"
@@ -91,7 +91,7 @@ pageEncoding="UTF-8"%> <%@ include file="../include/header.jsp" %>
                 id="userPhone2"
                 placeholder="휴대폰번호를 입력하세요."
               />
-            </div>
+            </div> -->
           </div>
           <div class="form-group email-form">
             <label for="email">이메일</label><br />
@@ -136,7 +136,7 @@ pageEncoding="UTF-8"%> <%@ include file="../include/header.jsp" %>
 
           <!--readonly 속성 추가시 자동으로 블락-->
           <div class="form-group">
-            <label for="addr-num">주소</label>
+            <!-- <label for="addr-num">주소</label>
             <div class="input-group">
               <input
                 type="text"
@@ -155,26 +155,26 @@ pageEncoding="UTF-8"%> <%@ include file="../include/header.jsp" %>
                   주소찾기
                 </button>
               </div>
-            </div>
+            </div> -->
           </div>
           <div class="form-group">
-            <input
+            <!-- <input
               type="text"
               class="form-control"
               name="addrBasic"
               id="addrBasic"
               placeholder="기본주소"
               readonly
-            />
+            /> -->
           </div>
           <div class="form-group">
-            <input
+            <!-- <input
               type="text"
               class="form-control"
               name="addrDetail"
               id="addrDetail"
               placeholder="상세주소"
-            />
+            /> -->
           </div>
 
           <!--button탭에 들어가서 버튼종류를 확인한다-->
@@ -433,7 +433,7 @@ pageEncoding="UTF-8"%> <%@ include file="../include/header.jsp" %>
             
             */
     /*test메서드를 통해 비교하며, 매칭되면 true, 아니면 false반환*/
-    var regex = /^[A-Za-z0-9+]{8,12}$/;
+    var regex = /^[A-Za-z0-9+]{7,12}$/;
     // test(문자열) -> 정규표현식의 규칙에 어긋나지 않는 문자라면 true, 어긋난다면 false
     if (regex.test(document.getElementById('userId').value)) {
       document.getElementById('userId').style.borderColor = 'green';
@@ -449,7 +449,9 @@ pageEncoding="UTF-8"%> <%@ include file="../include/header.jsp" %>
   /*비밀번호 형식 검사 스크립트*/
   var pw = document.getElementById('userPw');
   pw.onkeyup = function () {
-    var regex = /^[A-Za-z0-9+]{8,16}$/;
+    // var regex = /^[A-Za-z0-9+]{8,16}$/;
+  var regex = /^(?!((?:[A-Za-z]+)|(?:[~!@#$%^&*()_+=]+)|(?:[0-9]+))$)[A-Za-z\d~!@#$%^&*()_+=]{8,}$/
+
     if (regex.test(document.getElementById('userPw').value)) {
       document.getElementById('userPw').style.borderColor = 'green';
       document.getElementById('msgPw').innerHTML = '사용가능합니다';
@@ -464,7 +466,7 @@ pageEncoding="UTF-8"%> <%@ include file="../include/header.jsp" %>
   /*비밀번호 확인검사*/
   var pwConfirm = document.getElementById('pwConfirm');
   pwConfirm.onkeyup = function () {
-    var regex = /^[A-Za-z0-9+]{8,16}$/;
+  var regex = /^(?!((?:[A-Za-z]+)|(?:[~!@#$%^&*()_+=]+)|(?:[0-9]+))$)[A-Za-z\d~!@#$%^&*()_+=]{8,}$/
     if (
       document.getElementById('pwConfirm').value ==
       document.getElementById('userPw').value

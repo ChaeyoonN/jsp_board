@@ -13,11 +13,11 @@
                     <form method="post" name="loginForm">
                         <div class="form-group"><!--사용자클래스선언-->
                             <label for="id">아이디</label>
-                            <input type="text" name="userId" class="form-control" id="id" placeholder="아이디">
+                            <input type="text" name="userId" class="form-control" id="id" placeholder="아이디" autofocus>
                          </div>
                          <div class="form-group"><!--사용자클래스선언-->
                             <label for="id">비밀번호</label>
-                            <input type="password" name="userPw" class="form-control" id="pw" placeholder="비밀번호">
+                            <input type="password" name="userPw" class="form-control" id="pw" placeholder="비밀번호" autoComplete="off">
                          </div>
                          <div class="form-group">
                             <button type="button" id="loginBtn" class="btn btn-info btn-block">로그인</button>
@@ -42,21 +42,52 @@
         }
 
         //id, pw 입력란이 공백인지 아닌지 확인한 후, 공백이 아니라면 submit을 진행하세요.
-        //요청 url은 /user/userLogin -> post로 갑니다. (비동기 아니에요!)
+        //요청 url은 /user/userLogin -> post로 갑니다. (비동기 아니에요!) (action 안쓰면 자기자신 호출)
         document.getElementById('loginBtn').onclick = () => {
             
-            if(document.loginForm.userId.value === ''){
-                alert('아이디를 입력해 주세요.');
+            if(document.loginForm.userId.value.trim().length <= 0){
+                alert('공백이 아닌 아이디를 입력해 주세요.');
+                document.loginForm.userId.value = document.loginForm.userId.value.replaceAll(' ', '');
+                document.loginForm.userId.focus();  
                 return;
             }
-            if(document.loginForm.userPw.value === ''){
-                alert('비밀번호를 입력해 주세요.');
+            if(document.loginForm.userPw.value.trim().length <= 0){
+                alert('공백이 아닌 비밀번호를 입력해 주세요.');
+                document.loginForm.userPw.value = document.loginForm.userPw.value.replaceAll(' ', '');
+                document.loginForm.userPw.focus(); 
                 return;
             }
             document.loginForm.submit();
                 
             
         }
+
+        // 엔터 키 눌렀을 때도 로그인 폼 보내기
+        document.addEventListener("DOMContentLoaded", function() {
+            // 아이디 입력창에 autofocus 설정함
+            var usernameInput = document.loginForm.userId;
+            var passwordInput = document.loginForm.userPw;
+
+            usernameInput.addEventListener("keyup", function(event) {
+                if (event.key === "Enter") {
+                    if (usernameInput.value === ''){
+                        alert('아이디를 입력해 주세요.');
+                        return;
+                    }
+                    document.loginForm.submit();
+                }
+            });
+
+            passwordInput.addEventListener("keyup", function(event) {
+                if (event.key === "Enter") {
+                    if (passwordInput.value === ''){
+                        alert('비밀번호를 입력해 주세요.');
+                        return;
+                    }
+                    document.loginForm.submit();
+                }
+            });
+    });
 
         document.getElementById('joinBtn').onclick = function () {
             location.href = '${pageContext.request.contextPath}/user/userJoin';

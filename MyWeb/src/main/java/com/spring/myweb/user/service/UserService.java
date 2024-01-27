@@ -36,13 +36,13 @@ public class UserService {
 						.userId(dto.getUserId())
 						.userPw(dto.getUserPw())
 						.userName(dto.getUserName())
-						.userPhone1(dto.getUserPhone1())
-						.userPhone2(dto.getUserPhone2())
+//						.userPhone1(dto.getUserPhone1())
+//						.userPhone2(dto.getUserPhone2())
 						.userEmail1(dto.getUserEmail1())
 						.userEmail2(dto.getUserEmail2())
-						.addrBasic(dto.getAddrBasic())
-						.addrDetail(dto.getAddrDetail())
-						.addrZipNum(dto.getAddrZipNum())
+//						.addrBasic(dto.getAddrBasic())
+//						.addrDetail(dto.getAddrDetail())
+//						.addrZipNum(dto.getAddrZipNum())
 						.build();
 		//db에 등록
 		mapper.join(user);
