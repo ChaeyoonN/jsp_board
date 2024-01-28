@@ -2351,7 +2351,7 @@ th {
 .table > tfoot > tr > td {
   padding: 8px;
   line-height: 1.42857143;
-  vertical-align: top;
+  vertical-align: middle;
   border-top: 1px solid #ddd;
 }
 
@@ -2793,6 +2793,8 @@ fieldset[disabled] .checkbox label {
 }
 .input-sm {
   height: 30px;
+  width: 200px;
+  margin-top: 5px;
   padding: 5px 10px;
   /* font-size: 12px; */
   line-height: 1.5;

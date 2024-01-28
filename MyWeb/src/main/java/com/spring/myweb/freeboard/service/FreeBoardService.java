@@ -25,8 +25,8 @@ public class FreeBoardService implements IFreeBoardService {
 
 	@Override
 	public void regist(FreeRegistRequestDTO dto) {
-		String securePw = encoder.encode(dto.getPassword());
-		dto.setPassword(securePw);
+//		String securePw = encoder.encode(dto.getPassword());
+//		dto.setPassword(securePw);
 		
 		mapper.regist(FreeBoard.builder()
 						.title(dto.getTitle())
@@ -62,6 +62,11 @@ public class FreeBoardService implements IFreeBoardService {
 		
 		return dto;
 		
+	}
+	
+	@Override
+	public String getPassword(int bno) {
+		return mapper.getPassword(bno);
 	}
 
 	@Override

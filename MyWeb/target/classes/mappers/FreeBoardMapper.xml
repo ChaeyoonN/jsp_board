@@ -70,6 +70,12 @@
 		WHERE bno = #{bno}
 	</select>
 	
+	<select id="getPassword" resultType="String">
+		SELECT password 
+		FROM freeboard
+		WHERE bno = #{bno}
+	</select>
+	
 	<update id="update">
 		UPDATE freeboard SET 
 		title = #{title}, 

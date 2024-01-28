@@ -27,5 +27,7 @@ public interface IFreeBoardService {
 	
 	//삭제
 	void delete(int bno);
+	
+	String getPassword(int bno);
 		
 }

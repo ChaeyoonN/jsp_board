@@ -1,12 +1,19 @@
 package com.spring.myweb.freeboard.controller;
 
+import javax.servlet.http.HttpServletRequest;
+
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.spring.myweb.freeboard.dto.page.Page;
 import com.spring.myweb.freeboard.dto.page.PageCreator;
@@ -16,6 +23,7 @@ import com.spring.myweb.freeboard.dto.response.FreeContentResponseDTO;
 import com.spring.myweb.freeboard.service.IFreeBoardService;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.java.Log;
 import lombok.extern.slf4j.Slf4j;
 
 @Controller
@@ -25,6 +33,7 @@ import lombok.extern.slf4j.Slf4j;
 public class FreeBoardController {
 	
 	private final IFreeBoardService service;
+	private final BCryptPasswordEncoder encoder;
 	
 	//목록 확인
 	@GetMapping("/freeList")
@@ -91,11 +100,27 @@ public class FreeBoardController {
 	}
 	
 	//글 수정 페이지 이동 요청
-	@PostMapping("/modPage")
-	public String modPage(@ModelAttribute("board") FreeModifyRequestDTO dto) {
-		System.out.println("/freeboard/modPage: POST!");
-		return "freeboard/freeModify";
+	@PostMapping("/freeModify")
+	public String modPage(@ModelAttribute("board") FreeModifyRequestDTO dto,
+	                      @RequestParam("inputPw") String inputPw, 
+	                      Model model) {
+	    System.out.println("/freeboard/modPage: POST!");
+	    log.info("FreeModifyRequestDTO :{}",dto);
+	    log.info("inputPw :{}",inputPw);
+
+	    // DB에서 현재 비밀번호를 가져옵니다.
+	    String currentPassword = service.getPassword(dto.getBno());
+
+	    // 입력받은 비밀번호와 DB에 저장된 비밀번호를 비교합니다.
+	    if (currentPassword == null || !currentPassword.equals(inputPw)) {
+	        // 비밀번호가 일치하지 않으면 에러 메시지를 반환합니다.
+	        model.addAttribute("message", "pwWrong");
+	        return "redirect:/freeboard/content?bno=" + dto.getBno();
+	    }
+	    model.addAttribute("message", "pwCorrect");
+	    return "freeboard/freeModify";
 	}
+
 	
 	//글 수정
 	@PostMapping("/modify")
@@ -108,11 +133,24 @@ public class FreeBoardController {
 	
 	//글 삭제
 	@PostMapping("/delete") 
-	public String delete(int bno) {
-		System.out.println("/freeboard/delete: GET!");
-		service.delete(bno);
-		
-		return "redirect:/freeboard/freeList";
+	public String delete(int bno,
+	                     @RequestParam("inputPw") String inputPw,
+	                     RedirectAttributes redirectAttributes) {
+	    System.out.println("/freeboard/delete: GET!");
+
+	    // DB에서 현재 비밀번호를 가져옵니다.
+	    String currentPassword = service.getPassword(bno);
+	    log.info("dbPw :{}", currentPassword);
+	    // 입력받은 비밀번호와 DB에 저장된 비밀번호를 비교합니다.
+	    if (currentPassword == null || !currentPassword.equals(inputPw)) {
+	        // 비밀번호가 일치하지 않으면 에러 메시지를 반환합니다.
+	        redirectAttributes.addFlashAttribute("message", "비밀번호가 일치하지 않습니다.");
+	        return "redirect:/freeboard/content?bno=" + bno;
+	    }
+
+	    service.delete(bno);
+
+	    return "redirect:/freeboard/freeList";
 	}
 	
 }
