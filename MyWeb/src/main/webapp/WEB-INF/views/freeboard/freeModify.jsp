@@ -17,31 +17,41 @@ prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
         >
           <table class="table">
             <tbody class="t-control">
+              <tr style="display: none">
+                <td class="t-title">번호</td>
+                <td>
+                  <input
+                    class="form-control"
+                    name="bno"
+                    value="${board.bno}"
+                    readonly
+                  />
+                </td>
+              </tr>
               <tr>
                 <td class="t-title">NAME</td>
                 <td>
                   <input
                     class="form-control real-writer"
                     name="writer"
-                    value=""
-                    placeholder="10자 이내로 적어주세요."
+                    id="writer"
+                    value="${fn:escapeXml(board.writer)}"
                     width="200px"
                   />
-                  <div>
+                  <!-- <div>
                     <span id="writer-count" style="color: blue">0</span>/10
-                  </div>
+                  </div> -->
                   <!-- <div><span id="writer-count" style="color: blue;">0</span>/30</div> -->
                 </td>
               </tr>
-              <tr>
+              <tr style="display: none">
                 <td class="t-title">PASSWORD</td>
                 <td>
                   <input
                     type="password"
                     class="form-control real-password"
                     name="password"
-                    value=""
-                    placeholder="형식에 맞게 적어주세요."
+                    value="${board.password}"
                     width="200px"
                   />
                   <small class="password-instruction">
@@ -60,7 +70,9 @@ prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
                   <input
                     class="form-control cursor-control real-title"
                     name="title"
+                    id="title"
                     placeholder="제목은 40자 이내로 적어주세요."
+                    value="${fn:escapeXml(board.title)}"
                   />
                   <div>
                     <span id="title-count" style="color: blue">0</span>/40
@@ -76,7 +88,9 @@ prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
                     rows="20"
                     name="content"
                     placeholder="내용은 1000자 이내로 적어주세요."
-                  ></textarea>
+                  >
+${fn:escapeXml(board.content)}</textarea
+                  >
                   <div>
                     <span id="content-count" style="color: blue">0</span>/1000
                   </div>
@@ -128,20 +142,62 @@ ${fn:escapeXml(board.content)}</textarea
 <%@ include file="../include/footer.jsp" %>
 
 <script>
+  window.onload = function () {
+    var writerInput = document.getElementById("writer");
+    var titleInput = document.getElementById("title");
+    var contentInput = document.getElementById("content");
+
+    // 페이지가 로드되었을 때 제목과 내용 입력 필드의 글자수를 계산합니다.
+    updateCount(titleInput, "#title-count");
+    updateCount(contentInput, "#content-count");
+
+    // 사용자가 입력을 할 때마다 글자수를 계산합니다.
+    writerInput.addEventListener("input", function () {
+      checkLimit(writerInput, 10);
+    });
+    titleInput.addEventListener("input", function () {
+      updateCount(titleInput, "#title-count", 40);
+    });
+    contentInput.addEventListener("input", function () {
+      updateCount(contentInput, "#content-count", 1000);
+    });
+  }; // window.onload 끝
+
+  function checkLimit(input, limit) {
+    var count = input.value.replace(/\s/g, "").length; // 공백을 제외한 글자수를 계산합니다.
+
+    // 글자수 제한을 초과하면 알림을 보여주고 초과된 글자를 제거합니다.
+    if (count > limit) {
+      alert("글자수 제한을 초과하였습니다.");
+      input.value = input.value.slice(0, limit);
+    }
+  }
+
+  function updateCount(input, countSelector, limit) {
+    var count = input.value.replace(/\s/g, "").length; // 공백을 제외한 글자수를 계산합니다.
+    document.querySelector(countSelector).innerText = count; // 화면에 글자수를 업데이트합니다.
+
+    // 글자수 제한을 초과하면 알림을 보여주고 초과된 글자를 제거합니다.
+    if (count > limit) {
+      alert("글자수 제한을 초과하였습니다.");
+      input.value = input.value.slice(0, limit);
+      document.querySelector(countSelector).innerText = limit;
+    }
+  }
+
   //목록 이동 처리
   document.getElementById("list-btn").onclick = function () {
     location.href = "${pageContext.request.contextPath}/freeboard/freeList";
   };
 
-  //폼 태그는 메서드 없이 form 태그의 name으로 요소를 바로 취득할 수 있습니다.
   const $form = document.updateForm;
   //수정 버튼 이벤트
   document.getElementById("update-btn").onclick = function () {
     //form 내부의 요소를 지목할 땐 name 속성으로 바로 지목이 가능합니다. 폼태그.이름.값
-    if ($form.title.value.replaceAll(" ", "").length <= 0) {
+    if ($form.title.value.replace(/\s/g, "").length <= 0) {
       alert("제목은 필수 항목입니다.");
       return;
-    } else if ($form.content.value.replaceAll(" ", "").length <= 0) {
+    } else if ($form.content.value.replace(/\s/g, "").length <= 0) {
       alert("내용을 뭐라도 작성해 주세요!");
       return;
     }

@@ -99,11 +99,11 @@ public class FreeBoardController {
 		return "freeboard/freeDetail"; // 폴더명/파일명
 	}
 	
-	//글 수정 페이지 이동 요청
-	@PostMapping("/freeModify")
-	public String modPage(@ModelAttribute("board") FreeModifyRequestDTO dto,
-	                      @RequestParam("inputPw") String inputPw, 
-	                      Model model) {
+	// 수정 위한 비번 검증
+	@PostMapping("/modPage")
+	@ResponseBody
+	public String checkPw(@ModelAttribute("board") FreeModifyRequestDTO dto,
+	                      @RequestParam("inputPw") String inputPw) {
 	    System.out.println("/freeboard/modPage: POST!");
 	    log.info("FreeModifyRequestDTO :{}",dto);
 	    log.info("inputPw :{}",inputPw);
@@ -114,13 +114,43 @@ public class FreeBoardController {
 	    // 입력받은 비밀번호와 DB에 저장된 비밀번호를 비교합니다.
 	    if (currentPassword == null || !currentPassword.equals(inputPw)) {
 	        // 비밀번호가 일치하지 않으면 에러 메시지를 반환합니다.
-	        model.addAttribute("message", "pwWrong");
-	        return "redirect:/freeboard/content?bno=" + dto.getBno();
+	        return "pwWrong";
 	    }
-	    model.addAttribute("message", "pwCorrect");
+	    return "pwCorrect";
+	}
+	
+	// 삭제 위한 비번 검증
+		@PostMapping("/delete")
+		@ResponseBody
+		public String lookPw(@ModelAttribute("board") FreeModifyRequestDTO dto,
+		                      @RequestParam("inputPw") String inputPw) {
+		    System.out.println("/freeboard/modPage: POST!");
+		    log.info("FreeModifyRequestDTO :{}",dto);
+		    log.info("inputPw :{}",inputPw);
+
+		    // DB에서 현재 비밀번호를 가져옵니다.
+		    String currentPassword = service.getPassword(dto.getBno());
+
+		    // 입력받은 비밀번호와 DB에 저장된 비밀번호를 비교합니다.
+		    if (currentPassword == null || !currentPassword.equals(inputPw)) {
+		        // 비밀번호가 일치하지 않으면 에러 메시지를 반환합니다.
+		        return "pwWrong";
+		    }
+		    return "pwCorrect";
+		}
+	
+	// 글 수정 페이지 이동 요청
+	@GetMapping("/freeModify")
+	public String freeModify(@RequestParam("bno") int bno,
+			Model model) {
+	    // 'bno'를 이용하여 필요한 데이터를 가져옵니다.
+	    // 예를 들어, DB에서 해당 번호의 게시글 정보를 가져온다고 가정하면 다음과 같이 작성할 수 있습니다.
+		FreeContentResponseDTO dto = service.getContent(bno);
+	     model.addAttribute("board", dto);
+
+	    // 'freeModify.jsp' 페이지를 렌더링합니다.
 	    return "freeboard/freeModify";
 	}
-
 	
 	//글 수정
 	@PostMapping("/modify")
@@ -132,21 +162,21 @@ public class FreeBoardController {
 	}
 	
 	//글 삭제
-	@PostMapping("/delete") 
+	@PostMapping("/realDelete") 
 	public String delete(int bno,
 	                     @RequestParam("inputPw") String inputPw,
 	                     RedirectAttributes redirectAttributes) {
-	    System.out.println("/freeboard/delete: GET!");
+	    System.out.println("/freeboard/realDelete: POST!");
 
-	    // DB에서 현재 비밀번호를 가져옵니다.
-	    String currentPassword = service.getPassword(bno);
-	    log.info("dbPw :{}", currentPassword);
-	    // 입력받은 비밀번호와 DB에 저장된 비밀번호를 비교합니다.
-	    if (currentPassword == null || !currentPassword.equals(inputPw)) {
-	        // 비밀번호가 일치하지 않으면 에러 메시지를 반환합니다.
-	        redirectAttributes.addFlashAttribute("message", "비밀번호가 일치하지 않습니다.");
-	        return "redirect:/freeboard/content?bno=" + bno;
-	    }
+//	    // DB에서 현재 비밀번호를 가져옵니다.
+//	    String currentPassword = service.getPassword(bno);
+//	    log.info("dbPw :{}", currentPassword);
+//	    // 입력받은 비밀번호와 DB에 저장된 비밀번호를 비교합니다.
+//	    if (currentPassword == null || !currentPassword.equals(inputPw)) {
+//	        // 비밀번호가 일치하지 않으면 에러 메시지를 반환합니다.
+//	        redirectAttributes.addFlashAttribute("message", "비밀번호가 일치하지 않습니다.");
+//	        return "redirect:/freeboard/content?bno=" + bno;
+//	    }
 
 	    service.delete(bno);
 

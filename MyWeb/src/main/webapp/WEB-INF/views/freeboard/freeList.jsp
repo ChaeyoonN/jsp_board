@@ -6,7 +6,17 @@
 
     
     <%@ include file="../include/header.jsp" %>
-    
+  <style>
+    a#listHome:visited, a#listHome:active{
+        color: black;
+    }
+    a#listHome:link{
+        text-decoration: none;
+    }
+    a#listHome:hover{
+        color: #337ab7;
+    }
+  </style>  
     
     <!-- <c:set var="pageCount" value="${pc.articleTotalCount / 10}" /> -->
     <section>
@@ -15,7 +25,7 @@
                 <!--lg에서 9그리드, xs에서 전체그리드-->   
                 <div class="col-lg-9 col-xs-12 board-table">
                     <div class="titlebox">
-                        <p>자유게시판</p>
+                        <p><a id="listHome" href="${pageContext.request.contextPath}/freeboard/freeList">자유게시판</a></p>                 
                     </div>
                     <hr>
                     
@@ -81,13 +91,18 @@
 
                             <c:if test="${msg eq 'searchFail'}">
                                 <div>
-                                    <h1>검색 결과가 없습니다.</h1>
+                                    <h2><img width="58px" margin-right="5px"
+                                        src="${pageContext.request.contextPath}/img/alert.png"
+                                      />검색 결과가 없습니다.</h2>
                                 </div>
                             </c:if>
 
                             <c:if test="${msg eq 'zeroBoard'}">
                                 <div>
-                                    <h1>게시글이 존재하지 않는 게시판입니다. 게시글을 등록해 주세요!</h1>
+                                    <h2><img width="58px" margin-right="5px"
+                                        src="${pageContext.request.contextPath}/img/alert.png"
+                                      />현재 게시글이 존재하지 않습니다.</h2> 
+                                      
                                 </div>
                             </c:if>
 
