@@ -1,23 +1,25 @@
 ﻿<%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
-<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>  
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 
     
     <%@ include file="../include/header.jsp" %>
-  <style>
-    a#listHome:visited, a#listHome:active{
-        color: black;
-    }
-    a#listHome:link{
-        text-decoration: none;
-    }
-    a#listHome:hover{
-        color: #337ab7;
-    }
-  </style>  
-    
+
+<style>
+a#listHome:visited, a#listHome:active{
+    color: black;
+}
+a#listHome:link{
+    text-decoration: none;
+}
+a#listHome:hover{
+    color: #337ab7;
+}
+</style>  
+
     <!-- <c:set var="pageCount" value="${pc.articleTotalCount / 10}" /> -->
     <section>
         <div class="container-fluid">
@@ -77,8 +79,16 @@
 	                                <td>
                                         <a href="${pageContext.request.contextPath}/freeboard/content?bno=${vo.bno}&pageNo=${pc.page.pageNo}&amount=${pc.page.amount}&keyword=${pc.page.keyword}&condition=${pc.page.condition}"
                                     >
+                                        <c:if test="${vo.step > 0}">
+                                            <c:forEach var="i" begin="1" end="${vo.step}">
+                                                &nbsp;&nbsp;
+                                                <!-- <c:out value="&nbsp;&nbsp;" escapeXml="false" /> -->
+                                            </c:forEach>
+                                            <img style="display: inline-block;" src="${pageContext.request.contextPath}/img/reply-solid.png" />
+                                        </c:if>
                                         <span>
                                             <c:out value="${vo.title}" escapeXml="true" />
+                                            (<c:out value="${vo.commentCount}" escapeXml="true" />)
                                         </span>
                                         </a>
                                     </td>
@@ -149,7 +159,9 @@
 	
 	<%@ include file="../include/footer.jsp" %>
 
+ 
     <script>
+       
         //브라우저 창이 로딩이 완료된 후에 실행할 것을 보장하는 이벤트.
         window.onload = function() {
             

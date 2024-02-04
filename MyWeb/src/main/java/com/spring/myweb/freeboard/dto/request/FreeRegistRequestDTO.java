@@ -18,4 +18,9 @@ public class FreeRegistRequestDTO {
 	private String title;
 	private String content;
 	
+//	private int refNo;
+//	private int step;
+//	private int refOrder;
+//	private int answerNo;
+//	private int parentNo;
 }

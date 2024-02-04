@@ -8,6 +8,7 @@ import com.spring.myweb.freeboard.entity.FreeBoard;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.Setter;
 import lombok.ToString;
 
 
@@ -23,6 +24,12 @@ public class FreeContentResponseDTO {
 	private String content;
 	private String date;
 	
+	private int refNo;
+	private int step;
+	private int refOrder;
+	private int answerNo;
+	private int parentNo;
+	
 	//생성자
 	public FreeContentResponseDTO(FreeBoard board) {
 		super();
@@ -35,6 +42,12 @@ public class FreeContentResponseDTO {
 		this.date = board.getUpdateDate()==null? 
 				FreeListResponseDTO.makePrettierDateString(board.getRegDate()) : 
 				FreeListResponseDTO.makePrettierDateString(board.getUpdateDate())+"(수정됨)";
+		this.refNo = board.getRefNo();
+		this.step = board.getStep();
+		this.refOrder = board.getRefOrder();
+		this.answerNo = board.getAnswerNo();
+		this.parentNo = board.getParentNo();
+		
 //		if(board.getUpdateDate() == null) {
 //			this.date = FreeListResponseDTO.makePrettierDateString(board.getRegDate());
 //		}else {

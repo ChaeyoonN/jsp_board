@@ -45,7 +45,7 @@ public class Page {
 		this.amount = amount;
 	}
 	
-	// 메서드
+	// 메서드 (인덱스가 되어 amount씩 조회)
 	public int getPageStart() {
 		/*
 		 pageNo: 1 -> return 0

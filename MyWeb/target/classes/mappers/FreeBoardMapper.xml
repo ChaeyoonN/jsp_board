@@ -31,13 +31,30 @@
 	
 	<insert id="regist">
 		INSERT INTO freeboard
-		(bno, title, writer, content, password)
+		(bno, title, writer, content, password, ref_no)
 		VALUES(
 			freeboard_seq.NEXTVAL, 
 			#{title},
 			#{writer},
 		  	#{content},
-		   #{password}
+		   #{password},
+		   #{refNo}
+		   )
+	</insert>
+	
+	<insert id="registAns">
+		INSERT INTO freeboard
+		(bno, title, writer, content, password, ref_no, step, ref_order, parent_no)
+		VALUES(
+			freeboard_seq.NEXTVAL, 
+			#{title},
+			#{writer},
+		  	#{content},
+		   #{password},
+		   #{refNo},
+		   #{step},
+		   #{refOrder},
+		   #{parentNo}
 		   )
 	</insert>
 	
@@ -47,10 +64,17 @@
 			SELECT ROWNUM AS rn, tbl.*
 				FROM	
 				(
-				SELECT * FROM freeboard
-				<include refid="search" />
-				ORDER BY bno DESC
+				SELECT freeboard.*, NVL(tbl_reply.comment_count, 0) as comment_count
+                FROM freeboard
+                
+                LEFT JOIN (
+                    SELECT bno, COUNT(*) as comment_count
+                    FROM tbl_reply
+                    GROUP BY bno
+                ) tbl_reply ON freeboard.bno = tbl_reply.bno
+                ORDER BY ref_no DESC, ref_order ASC
 				) tbl
+				<include refid="search" />
 			)
 		<!-- CDATA: Character Data의 약자로, 마크업 언어에서 문자열 데이터를 표기하기 위한 문법입니다.
 			특수 문자 등을 태그가 아니라 순수한 문자로 표기하고 싶을 때 사용하는 태그입니다. -->
@@ -65,6 +89,38 @@
 		<include refid="search"></include>
 	</select>
 	
+	<select id="getMaxRefNo" resultType="int">
+		SELECT max(ref_no) FROM freeboard
+	</select>
+	
+	<select id="getEqualRefNo" resultType="int">
+		SELECT COUNT(*) FROM freeboard
+		WHERE ref_no = #{refNo}
+	</select>
+	
+	<select id="getAllEqualRefNo" resultType="freeboard">
+		SELECT * FROM freeboard
+		WHERE ref_no = #{refNo}
+	</select>
+	
+	<update id="updateRefOrder" parameterType="map">
+		UPDATE freeboard SET 
+		ref_order = #{refOrder}
+		WHERE bno = #{bno}
+	</update>
+	
+	<update id="updatePastRefOrder">
+		update freeboard set ref_order = ref_order + 1 
+		where parent_no = #{parentNo} 
+		and ref_order > #{refOrder}
+	</update>
+	
+	<update id="updateAnswerNo" parameterType="map">
+		UPDATE freeboard SET 
+		answer_no = #{answerNo}
+		WHERE bno = #{bno} 
+	</update>
+	
 	<select id="getContent" resultType="freeboard">
 		SELECT * FROM freeboard
 		WHERE bno = #{bno}
@@ -78,6 +134,7 @@
 	
 	<update id="update">
 		UPDATE freeboard SET 
+		writer = #{writer},
 		title = #{title}, 
 		content = #{content}, 
 		update_date = sysdate

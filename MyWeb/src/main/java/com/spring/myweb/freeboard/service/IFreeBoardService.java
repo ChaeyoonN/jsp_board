@@ -26,8 +26,11 @@ public interface IFreeBoardService {
 	void update(FreeModifyRequestDTO dto);
 	
 	//삭제
-	void delete(int bno);
+	String delete(int bno);
 	
 	String getPassword(int bno);
+
+	// 답글 등록
+	void ansRegist(int bno, FreeRegistRequestDTO dto);
 		
 }

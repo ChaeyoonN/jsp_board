@@ -34,6 +34,8 @@
 		<url-pattern>/</url-pattern>
 	</servlet-mapping>
 	
+
+	
 	<!-- 한글 인코딩 필터 설정(톰캣 내부의 한글처리) -->
     <filter>
         <filter-name>encodingFilter</filter-name>

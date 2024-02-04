@@ -1,5 +1,7 @@
-﻿<%@ page language="java" contentType="text/html; charset=UTF-8"
-pageEncoding="UTF-8"%> <%@ include file="../include/header.jsp" %>
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+pageEncoding="UTF-8"%> <%@ taglib uri="http://java.sun.com/jsp/jstl/core"
+prefix="c" %> <%@ include file="../include/header.jsp" %>
+
 <style>
   small.password-instruction {
     display: block; /* 블록 레벨 요소로 만들어 줍니다 (새 줄에서 시작) */
@@ -32,17 +34,29 @@ pageEncoding="UTF-8"%> <%@ include file="../include/header.jsp" %>
       <div class="col-xs-12 content-wrap">
         <div class="titlebox">
           <p>
-            <a
+            <!-- <a
               id="listHome"
               href="${pageContext.request.contextPath}/freeboard/freeList"
               >자유게시판</a
-            >
+            > -->
+            답변하기
           </p>
         </div>
 
         <form method="post" name="boardForm">
           <table class="table">
             <tbody class="t-control">
+              <tr style="display: none">
+                <td class="t-title">번호</td>
+                <td>
+                  <input
+                    class="form-control"
+                    name="bno"
+                    value="${board.bno}"
+                    readonly
+                  />
+                </td>
+              </tr>
               <tr>
                 <td class="t-title">NAME</td>
                 <td>
@@ -114,7 +128,7 @@ pageEncoding="UTF-8"%> <%@ include file="../include/header.jsp" %>
             </tbody>
           </table>
           <div class="titlefoot">
-            <button type="button" id="reg" class="btn">등록</button>
+            <button type="button" id="reg" class="btn">답변등록</button>
             <button
               type="button"
               class="btn"
@@ -206,10 +220,10 @@ pageEncoding="UTF-8"%> <%@ include file="../include/header.jsp" %>
         updateCount(titleInput, "#title-count", 40);
       }, 0);
     });
-    contentInput.addEventListener("paste", function () {
+    contentInput.addEventListener("paste", function (e) {
       console.log("내용 복붙에 대해 작동");
       setTimeout(function () {
-        updateCount(contentInput, "#content-count", 1000);
+        updateCount(e.target, "#content-count", 1000);
       }, 0);
     });
   };
@@ -883,155 +897,4 @@ pageEncoding="UTF-8"%> <%@ include file="../include/header.jsp" %>
       textarea.placeholder = "내용은 1000자 이내로 적어주세요.";
     }
   });
-
-  // /***************** 내용 글자수 제한 **********************/
-  // // 이름 허용 용량: 한글 30자 (컬럼 바차2 100바이트)
-  // // 제목 허용 용량: 한글 40글자 (컬럼 바차2 150바이트)
-  // // 내용 허용 용량: 한글 1000자 (컬럼 바차2 4000바이트)
-
-  // // 커서 맨뒤로 보내는 함수
-  // const moveCursorToEnd = (e) => {
-  //   console.log("Move cursor to the end!");
-  //   console.log("Event element: ", e.target);
-  //   if (e.target.tagName !== "INPUT" && e.target.tagName !== "TEXTAREA") {
-  //     return;
-  //   }
-
-  //   const len = e.target.value.length;
-  //   e.target.focus();
-  //   e.target.setSelectionRange(len, len);
-  // };
-
-  // //   var table = document.querySelector('.t-control');
-  // //   table.addEventListener('click', moveCursorBack);
-
-  // // 공백 제외 글자수 세는 함수
-  // function onInputCount(e) {
-  //   // input 또는 textarea 요소를 선택합니다.
-  //   // 입력 내용을 가져옵니다.
-  //   var inputElement = e.target;
-  //   var inputValue = inputElement.value;
-  //   // console.log("입력값: ", inputValue);
-  //   console.log("입력값 길이(공백 포함): ", inputValue.length);
-  //   // console.log("입력값 길이(공백 미포함): ",inputValue.replaceAll(' ', '').length);
-
-  //   // 줄바꿈 제거
-  //   var noEnter = inputValue.replace(/\n/g, "");
-
-  //   // 공백 제거
-  //   var noBlank = noEnter.replace(/\s*/g, "");
-  //   var noSpace = noBlank.replaceAll(" ", "");
-
-  //   console.log("입력값 길이(공백 미포함): ", noSpace.length);
-
-  //   return noSpace.length;
-  // }
-
-  // // 글자수를 span태그안에 넣는 함수
-  // function onInputPrint(e) {
-  //   var inputElement = e.target;
-  //   var inputValue = inputElement.value;
-
-  //   // 글자수 출력 span태그 있다면 넣기
-  //   const siblingDiv =
-  //     inputValue.nextElementSibling.tagName === "DIV"
-  //       ? inputValue.nextElementSibling
-  //       : inputValue.previousElementSibling.tagName === "DIV"
-  //       ? inputValue.previousElementSibling
-  //       : null;
-
-  //   if (siblingDiv) {
-  //     console.log("형제 div 태그가 있습니다: ", siblingDiv);
-  //     const innerSpan = siblingDiv.querySelector("span");
-  //     if (innerSpan) {
-  //       innerSpan.innerHTML = PureLength; // 넣기
-  //       console.log("글자수 넣기 완료!");
-  //     } else {
-  //       console.log("'div' 형제 요소 안에 'span' 태그가 없습니다.");
-  //     }
-  //   } else {
-  //     console.log("형제 div 태그가 없습니다.");
-  //   }
-  // }
-
-  // /*************함수 호출***************/
-  // titleTag.addEventListener("input", function (e) {
-  //   var maxLength = 40;
-
-  //   // 길이 계산을 위해 스페이스와 줄바꿈 문자를 제거하지만 입력값에는 그대로 유지
-  //   var valueWithoutSpaces = e.target.value.replace(/\s/g, "");
-  //   var currentLength = valueWithoutSpaces.length;
-
-  //   // 글자수를 세서 span 태그에 출력
-  //   document.getElementById("title-count").innerText = currentLength;
-
-  //   // 특정 글자수를 넘으면 알림창을 띄우고 초과한 글자수를 지워줌
-  //   if (currentLength > maxLength) {
-  //     alert("입력 가능한 글자수가 초과되었습니다!");
-  //     var excessLength = currentLength - maxLength;
-  //     var actualLength = e.target.value.length;
-  //     e.target.value = e.target.value.substring(0, actualLength - excessLength);
-  //     currentLength = e.target.value.replace(/\s/g, "").length;
-
-  //     // 글자수를 다시 세서 span 태그에 출력
-  //     document.getElementById("title-count").innerText = currentLength;
-
-  //     // 커서를 맨마지막 부분에 놓음
-  //     e.target.focus();
-  //     var cursorPosition = e.target.value.length;
-  //     e.target.setSelectionRange(cursorPosition, cursorPosition);
-  //   }
-  // });
-
-  // contentTag.addEventListener("input", function (e) {
-  //   var maxLength = 1000;
-
-  //   // 길이 계산을 위해 스페이스와 줄바꿈 문자를 제거하지만 입력값에는 그대로 유지
-  //   var valueWithoutSpaces = e.target.value.replace(/\s/g, "");
-  //   var currentLength = valueWithoutSpaces.length;
-
-  //   // 글자수를 세서 span 태그에 출력
-  //   document.getElementById("content-count").innerText = currentLength;
-
-  //   // 특정 글자수를 넘으면 알림창을 띄우고 초과한 글자수를 지워줌
-  //   if (currentLength > maxLength) {
-  //     alert("입력 가능한 글자수가 초과되었습니다!");
-  //     var excessLength = currentLength - maxLength;
-  //     var actualLength = e.target.value.length;
-  //     e.target.value = e.target.value.substring(0, actualLength - excessLength);
-  //     currentLength = e.target.value.replace(/\s/g, "").length;
-
-  //     // 글자수를 다시 세서 span 태그에 출력
-  //     document.getElementById("content-count").innerText = currentLength;
-
-  //     // 커서를 맨마지막 부분에 놓음
-  //     e.target.focus();
-  //     var cursorPosition = e.target.value.length;
-  //     e.target.setSelectionRange(cursorPosition, cursorPosition);
-  //   }
-  // });
-
-  // writerTag.addEventListener("input", function (e) {
-  //   var maxLength = 10;
-
-  //   // 스페이스와 줄바꿈 문자를 제거한 후 길이를 계산
-  //   var currentLength = e.target.value.replace(/\s/g, "").length;
-
-  //   // 글자수를 세서 span 태그에 출력
-  //   document.getElementById("writer-count").innerText = currentLength;
-
-  //   // 특정 글자수를 넘으면 알림창을 띄우고 초과한 글자수를 지워줌
-  //   if (currentLength > maxLength) {
-  //     alert("입력 가능한 글자수가 초과되었습니다!");
-  //     e.target.value = e.target.value.substring(0, maxLength);
-  //     currentLength = e.target.value.replace(/\s/g, "").length;
-
-  //     // 글자수를 다시 세서 span 태그에 출력
-  //     document.getElementById("writer-count").innerText = currentLength;
-  //   }
-
-  //   // 커서를 맨마지막 부분에 놓음
-  //   e.target.focus();
-  //   e.target.setSelectionRange(currentLength, currentLength);
-  // });
 </script>

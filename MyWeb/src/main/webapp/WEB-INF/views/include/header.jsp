@@ -6,14 +6,8 @@ prefix="c" %>
 <html>
   <head>
     <meta charset="utf-8" />
-    <meta
-      http-equiv="X-UA-Compatible"
-      content="IE=edge"
-    />
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1"
-    />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>게시판</title>
 
     <link
@@ -46,9 +40,7 @@ prefix="c" %>
                   <span class="icon-bar"></span>
                   <span class="icon-bar"></span>
                 </button>
-                <a
-                  class="navbar-brand"
-                  href="#"
+                <a class="navbar-brand" href="#"
                   ><img
                     width="30"
                     src="${pageContext.request.contextPath }/img/logo.svg"
@@ -56,10 +48,7 @@ prefix="c" %>
                 /></a>
               </div>
 
-              <div
-                class="collapse navbar-collapse"
-                id="myNavbar"
-              >
+              <div class="collapse navbar-collapse" id="myNavbar">
                 <ul class="nav navbar-nav">
                   <li class="active"><a href="<c:url value='/' />">Main</a></li>
                   <li>
@@ -81,10 +70,7 @@ prefix="c" %>
                 </ul>
                 <ul class="nav navbar-nav navbar-right">
                   <li class="dropdown">
-                    <a
-                      class="dropdown-toggle"
-                      data-toggle="dropdown"
-                      href="#"
+                    <a class="dropdown-toggle" data-toggle="dropdown" href="#"
                       >로그인 <span class="caret"></span
                     ></a>
                     <ul class="dropdown-menu">
@@ -113,9 +99,7 @@ prefix="c" %>
                           >
                         </li>
                         <li>
-                          <a
-                            id="logout"
-                            href="#"
+                          <a id="logout" href="#"
                             ><span class="glyphicon glyphicon-log-out"></span
                             >Logout</a
                           >
@@ -125,10 +109,7 @@ prefix="c" %>
                   </li>
                 </ul>
 
-                <form
-                  class="navbar-form navbar-right"
-                  action=""
-                >
+                <form class="navbar-form navbar-right" action="">
                   <div class="input-group">
                     <input
                       type="text"
@@ -136,10 +117,7 @@ prefix="c" %>
                       placeholder="Search"
                     />
                     <div class="input-group-btn">
-                      <button
-                        class="btn btn-primary"
-                        type="submit"
-                      >
+                      <button class="btn btn-primary" type="submit">
                         검색
                       </button>
                     </div>
@@ -152,20 +130,20 @@ prefix="c" %>
       </div>
     </header>
     <script>
-      document.querySelector('.dropdown').addEventListener('click', (e) => {
+      document.querySelector(".dropdown").addEventListener("click", (e) => {
         //addEventListener()의 매개변수: type, func
 
         //1. 이벤트가 발생한 target이 a태그가 아니라면 이벤트 강제 종료!
-        if (!e.target.matches('a#logout')) return;
+        if (!e.target.matches("a#logout")) return;
 
-        console.log('로그아웃a태그에만 이벤트 발생!');
+        console.log("로그아웃a태그에만 이벤트 발생!");
 
-        let f = document.createElement('form');
+        let f = document.createElement("form");
 
-        f.setAttribute('method', 'post');
+        f.setAttribute("method", "post");
         f.setAttribute(
-          'action',
-          '${pageContext.request.contextPath}/user/logout'
+          "action",
+          "${pageContext.request.contextPath}/user/logout"
         );
         document.body.appendChild(f);
         f.submit();

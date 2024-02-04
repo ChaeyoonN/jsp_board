@@ -16,7 +16,15 @@ public class FreeListResponseDTO {
 	private int bno;
 	private String title;
 	private String writer;
+	private String password;
 	private String date;
+	
+	private int refNo;
+	private int step;
+	private int refOrder;
+	private int answerNo;
+	private int parentNo;
+	private int commentCount;
 	
 	//생성자
 	public FreeListResponseDTO(FreeBoard board) {
@@ -24,7 +32,15 @@ public class FreeListResponseDTO {
 		this.bno = board.getBno();
 		this.title = board.getTitle();
 		this.writer = board.getWriter();
+		this.password = board.getPassword();
 		this.date = makePrettierDateString(board.getRegDate());
+		
+		this.refNo = board.getRefNo();
+		this.step = board.getStep();
+		this.refOrder = board.getRefOrder();
+		this.answerNo = board.getAnswerNo();
+		this.parentNo = board.getParentNo();
+		this.commentCount = board.getCommentCount();
 	}
 	
 	//메서드 (같은 패키지에서 열 수 있도록 default, 객체 없이 호출할 수 있도록 static)

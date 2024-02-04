@@ -7,6 +7,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -163,24 +164,44 @@ public class FreeBoardController {
 	
 	//글 삭제
 	@PostMapping("/realDelete") 
+//	@ResponseBody
 	public String delete(int bno,
 	                     @RequestParam("inputPw") String inputPw,
-	                     RedirectAttributes redirectAttributes) {
+	                     RedirectAttributes redirectAttributes, 
+	                     Model model) {
 	    System.out.println("/freeboard/realDelete: POST!");
-
-//	    // DB에서 현재 비밀번호를 가져옵니다.
-//	    String currentPassword = service.getPassword(bno);
-//	    log.info("dbPw :{}", currentPassword);
-//	    // 입력받은 비밀번호와 DB에 저장된 비밀번호를 비교합니다.
-//	    if (currentPassword == null || !currentPassword.equals(inputPw)) {
-//	        // 비밀번호가 일치하지 않으면 에러 메시지를 반환합니다.
-//	        redirectAttributes.addFlashAttribute("message", "비밀번호가 일치하지 않습니다.");
-//	        return "redirect:/freeboard/content?bno=" + bno;
-//	    }
-
-	    service.delete(bno);
-
-	    return "redirect:/freeboard/freeList";
+	    
+	    String msg = service.delete(bno);
+	    model.addAttribute("mes", msg);
+	    if(msg.equals("deleteFailCauseOfChild")) {
+	    	return "freeboard/freeDetail";
+	    } else {
+	    	return "redirect:/freeboard/freeList";
+	    }
+	    
 	}
+	
+	//답변글쓰기 페이지를 열어주는 메서드
+	@GetMapping("/freeAnsRegist")
+	public String goToAnsRegist(@RequestParam("bno") int bno,
+			Model model) {
+	    // 'bno'를 이용하여 필요한 데이터를 가져옵니다.
+	    // 예를 들어, DB에서 해당 번호의 게시글 정보를 가져온다고 가정하면 다음과 같이 작성할 수 있습니다.
+		FreeContentResponseDTO dto = service.getContent(bno);
+	     model.addAttribute("board", dto);
+
+	    // 'freeAnsRegist.jsp' 페이지를 렌더링합니다.   
+	     return "freeboard/freeAnsRegist";
+	}
+	
+	// 답변 글 등록 요청
+	@PostMapping("/freeAnsRegist")
+	public String ansRegist(@RequestParam("bno") int bno, FreeRegistRequestDTO dto) {
+		System.out.println("/freeboard/freeAnsRegist: POST!");
+		service.ansRegist(bno, dto);
+		return "redirect:/freeboard/freeList";
+	}
+	
+	
 	
 }
