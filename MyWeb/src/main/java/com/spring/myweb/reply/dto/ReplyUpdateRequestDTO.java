@@ -19,12 +19,14 @@ public class ReplyUpdateRequestDTO {
 
 	private int rno;
 	private String replyPw;
+	private String replyWriter;
 	private String replyText;
 	
 	public Reply toEntity(ReplyUpdateRequestDTO dto) {
 		return Reply.builder()
 					.rno(this.rno)
 					.replyPw(this.replyPw)
+					.replyWriter(this.replyWriter)
 					.replyText(this.replyText)
 					.build();
 	}

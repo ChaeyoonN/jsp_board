@@ -1,5 +1,10 @@
 ﻿<%@ page language="java" contentType="text/html; charset=UTF-8"
-pageEncoding="UTF-8"%> <%@ include file="../include/header.jsp" %>
+pageEncoding="UTF-8"%> <%@ include file="../include/header.jsp" %> <%@ page
+import="java.io.File" %> <%@ page
+import="com.oreilly.servlet.multipart.DefaultFileRenamePolicy"%> <%@ page
+import="com.oreilly.servlet.MultipartRequest" %> <%@ page import="java.util.*"
+%>
+
 <style>
   small.password-instruction {
     display: block; /* 블록 레벨 요소로 만들어 줍니다 (새 줄에서 시작) */
@@ -14,15 +19,26 @@ pageEncoding="UTF-8"%> <%@ include file="../include/header.jsp" %>
     margin-top: 5px; /* 입력란과의 간격 */
   }
 
-  a#listHome:visited,
-  a#listHome:active {
-    color: black;
+  .table > tfoot > tr > td:nth-child(1) {
+    text-align: center;
   }
-  a#listHome:link {
-    text-decoration: none;
+  .file-upload-cell {
+    display: flex;
+    justify-content: center;
   }
-  a#listHome:hover {
-    color: #337ab7;
+
+  .file-input-container {
+    display: flex;
+    align-items: center;
+  }
+
+  .file-input {
+    margin-right: 10px;
+  }
+
+  .button-container {
+    display: flex;
+    gap: 10px;
   }
 </style>
 
@@ -31,16 +47,10 @@ pageEncoding="UTF-8"%> <%@ include file="../include/header.jsp" %>
     <div class="row">
       <div class="col-xs-12 content-wrap">
         <div class="titlebox">
-          <p>
-            <a
-              id="listHome"
-              href="${pageContext.request.contextPath}/freeboard/freeList"
-              >자유게시판</a
-            >
-          </p>
+          <p>등록하기</p>
         </div>
-
-        <form method="post" name="boardForm">
+        <!-- 파일 전송을 위한 multipart 선언 -->
+        <form method="post" name="boardForm" enctype="multipart/form-data">
           <table class="table">
             <tbody class="t-control">
               <tr>
@@ -112,7 +122,31 @@ pageEncoding="UTF-8"%> <%@ include file="../include/header.jsp" %>
                 </td>
               </tr>
             </tbody>
+            <tfoot id="fileList">
+              <tr>
+                <td class="t-title" rowspan="10">FILE</td>
+
+                <td id="item1" style="border: none" class="file-upload-cell">
+                  <div class="file-input-container">
+                    <input type="file" name="file" class="file-input" />
+                    <div class="button-container">
+                      <button type="button" class="addItemBtn">
+                        <img
+                          style="display: inline-block"
+                          src="${pageContext.request.contextPath}/img/add.png"
+                        />
+                      </button>
+                      <!-- <button type="button" class="removeItemBtn"><img
+                          style="display: inline-block"
+                          src="${pageContext.request.contextPath}/img/remove.png"
+                        /></button> -->
+                    </div>
+                  </div>
+                </td>
+              </tr>
+            </tfoot>
           </table>
+
           <div class="titlefoot">
             <button type="button" id="reg" class="btn">등록</button>
             <button
@@ -145,6 +179,45 @@ pageEncoding="UTF-8"%> <%@ include file="../include/header.jsp" %>
   console.log(passwordTag);
   console.log(titleTag);
   console.log(contentTag);
+
+  // [J-Query] 버튼 클릭시 마다 파일업로드 칸이 추가
+  $(document).ready(function () {
+    var count = 1; // 아이템의 초기 인덱스 설정
+
+    // 아이템 추가 버튼 클릭 이벤트
+    $(document).on("click", ".addItemBtn", function () {
+      count++; // 아이템 인덱스 증가
+      var deleteButton =
+        count > 1
+          ? '<button type="button" class="removeItemBtn"><img style="display: inline-block" src="${pageContext.request.contextPath}/img/remove.png"/></button>'
+          : "";
+      var item =
+        `<tr>
+              <td id="item` +
+        count +
+        `" style="border: none" class="file-upload-cell">
+                <div class="file-input-container">
+                  <input type="file" name="file" class="file-input" />
+                  <div class="button-container">
+                    <button type="button" class="addItemBtn"><img
+                          style="display: inline-block"
+                          src="${pageContext.request.contextPath}/img/add.png"
+                        /></button>` +
+        deleteButton +
+        `</div>
+                </div>
+              </td>
+            </tr>`;
+      // 생성한 아이템을 tfoot에 추가
+      $("#fileList").append(item);
+    });
+
+    // 아이템 삭제 버튼 클릭 이벤트
+    $(document).on("click", ".removeItemBtn", function () {
+      // 현재 버튼이 있는 tr 요소를 찾아 삭제
+      $(this).closest("tr").remove();
+    });
+  });
 
   function resize(obj) {
     obj.style.height = "1px";
@@ -637,6 +710,7 @@ pageEncoding="UTF-8"%> <%@ include file="../include/header.jsp" %>
     // }
   };
 
+  // 등록 요청
   document.getElementById("reg").onclick = () => {
     const title = document.getElementById("title").value;
     const content = document.getElementById("content").value;
@@ -646,6 +720,24 @@ pageEncoding="UTF-8"%> <%@ include file="../include/header.jsp" %>
     console.log("이름 길이", writer.replace(/\s/g, "").length);
     console.log("제목 길이", title.replace(/\s/g, "").length);
     console.log("내용 길이", content.replace(/\s/g, "").length);
+
+    //
+    var form = document.boardForm;
+    var formData = new FormData(form);
+
+    // const $data = document.boardForm.file; //이미지 첨부 input
+
+    // console.log("파일 태그요소: ", $data); // 태그요소
+    // console.log("data: ", $data[0]); // undefined
+
+    // console.log($data.files); //파일태그에 담긴 파일 정보를 확인하는 프로퍼티. FileList
+    // console.log($data.files[0]);
+
+    // formData.append("file", $data.files); //'폼태그name' ---> 이름 같아야 컨트롤러에서 dto로 받음
+    // formData.append("title", title);
+    // formData.append("content", content);
+    // formData.append("writer", writer);
+    // formData.append("password", password);
 
     //유효성 검사
     if (title === "") {
@@ -774,8 +866,20 @@ pageEncoding="UTF-8"%> <%@ include file="../include/header.jsp" %>
       return;
     }
 
-    // alert("등록되었습니다.");
-    document.boardForm.submit();
+    // document.boardForm.submit();
+    $.ajax({
+      type: "POST",
+      url: "${pageContext.request.contextPath}/freeboard/freeRegist",
+      data: formData,
+      processData: false,
+      contentType: false,
+      success: function (response) {
+        // 성공 시 처리
+      },
+      error: function (error) {
+        // 실패 시 처리
+      },
+    });
   };
 
   // 문자열에서 공백과 줄바꿈을 제외한 글자수를 계산하는 함수입니다.

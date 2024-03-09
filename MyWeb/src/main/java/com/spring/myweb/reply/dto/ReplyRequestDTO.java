@@ -16,7 +16,7 @@ import lombok.ToString;
 public class ReplyRequestDTO {
 		
 	private int bno;
-	private String replyText;
+	private String replyText;	
 	private String replyId;
 	private String replyPw; //js 요청과 함께 전달한 body객체 데이터명과 같게
 	

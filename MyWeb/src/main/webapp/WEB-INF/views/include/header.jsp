@@ -109,7 +109,7 @@ prefix="c" %>
                   </li>
                 </ul>
 
-                <form class="navbar-form navbar-right" action="">
+                <!-- <form class="navbar-form navbar-right" action="">
                   <div class="input-group">
                     <input
                       type="text"
@@ -122,7 +122,7 @@ prefix="c" %>
                       </button>
                     </div>
                   </div>
-                </form>
+                </form> -->
               </div>
             </div>
           </div>

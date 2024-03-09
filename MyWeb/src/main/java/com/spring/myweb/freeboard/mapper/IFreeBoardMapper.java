@@ -1,6 +1,7 @@
 package com.spring.myweb.freeboard.mapper;
 
 import java.util.List;
+import java.util.Map;
 
 import org.apache.ibatis.annotations.Param;
 
@@ -10,7 +11,9 @@ import com.spring.myweb.freeboard.entity.FreeBoard;
 public interface IFreeBoardMapper {
 
 	//글 등록
-	void regist(FreeBoard freeBoard);
+	int regist(FreeBoard freeBoard);
+
+	void insertFile(Map<String, Object> fileMap);
 	
 	//글 목록
 	List<FreeBoard> getList(Page page);
@@ -26,6 +29,9 @@ public interface IFreeBoardMapper {
 	
 	//삭제
 	void delete(int bno);
+	
+	// 삭제 대용 업뎃
+	void updateWhenAnsExist(int bno);
 	
 	//상세보기
 	String getPassword(int bno);
@@ -48,5 +54,6 @@ public interface IFreeBoardMapper {
 	
 	// 답변글 등록
 	void registAns(FreeBoard freeBoard);
+	
 	
 }

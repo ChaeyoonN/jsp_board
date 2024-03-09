@@ -1,17 +1,31 @@
 package com.spring.myweb.freeboard.service;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.UUID;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.spring.myweb.freeboard.dto.page.Page;
 import com.spring.myweb.freeboard.dto.request.FreeModifyRequestDTO;
@@ -20,6 +34,7 @@ import com.spring.myweb.freeboard.dto.response.FreeContentResponseDTO;
 import com.spring.myweb.freeboard.dto.response.FreeListResponseDTO;
 import com.spring.myweb.freeboard.entity.FreeBoard;
 import com.spring.myweb.freeboard.mapper.IFreeBoardMapper;
+import com.spring.myweb.snsboard.entity.SnsBoard;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -31,11 +46,15 @@ public class FreeBoardService implements IFreeBoardService {
 	
 	private final IFreeBoardMapper mapper;
 	private final BCryptPasswordEncoder encoder;
+//	private final FileDAO fileDAO;
 
 	@Override
-	public void regist(FreeRegistRequestDTO dto) {
-//		String securePw = encoder.encode(dto.getPassword());
-//		dto.setPassword(securePw);
+	public void regist(String writer,
+	        String password,
+	        String title,
+	        String content,
+	        List<MultipartFile> files) {
+		
 		int maxRefNo;
 		if(mapper.getMaxRefNo() != null) {
 			maxRefNo = 
@@ -43,15 +62,64 @@ public class FreeBoardService implements IFreeBoardService {
 		} else {
 			maxRefNo = 0;
 		}
-		mapper.regist(FreeBoard.builder()
-						.title(dto.getTitle())
-						.content(dto.getContent())
-						.writer(dto.getWriter())
-						.password(dto.getPassword())
-						.refNo(maxRefNo+1)
-						.build());
+		
+		List<String> filePaths = new ArrayList<>();
+		for (MultipartFile file : files) {
+		    String fileName = StringUtils.cleanPath(file.getOriginalFilename());
+		    Path dirPath = Paths.get("uploads");
+		    Path filePath = dirPath.resolve(fileName);
+		    try {
+		        if (!Files.exists(dirPath)) {
+		            Files.createDirectories(dirPath);
+		        }
+		        Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+		    } catch (IOException e) {
+		        throw new RuntimeException("파일 저장에 실패하였습니다.", e);
+		    }
+		    filePaths.add(filePath.toString());
+		}
+
+		FreeBoard board = FreeBoard.builder()
+							.title(title)
+							.content(content)
+							.writer(writer)
+							.password(password)
+							.refNo(maxRefNo+1)
+					//		.filePaths(filePaths)
+							.build();
+		mapper.regist(board);
+		int bno = board.getBno();
+
+	    for (String filePath : filePaths) {
+	        Map<String, Object> fileMap = new HashMap<>();
+	        fileMap.put("bno", bno);
+	        fileMap.put("filePath", filePath);
+	        fileMap.put("fileName", Paths.get(filePath).getFileName().toString());
+	        mapper.insertFile(fileMap);
+	    }
 
 	}
+	
+//	@Override
+//	public void regist(FreeRegistRequestDTO dto) {
+////		String securePw = encoder.encode(dto.getPassword());
+////		dto.setPassword(securePw);
+//		int maxRefNo;
+//		if(mapper.getMaxRefNo() != null) {
+//			maxRefNo = 
+//					Objects.requireNonNull(mapper.getMaxRefNo());
+//		} else {
+//			maxRefNo = 0;
+//		}
+//		mapper.regist(FreeBoard.builder()
+//						.title(dto.getTitle())
+//						.content(dto.getContent())
+//						.writer(dto.getWriter())
+//						.password(dto.getPassword())
+//						.refNo(maxRefNo+1)
+//						.build());
+//
+//	}
 	
 	//
 	@Override
@@ -198,22 +266,85 @@ public class FreeBoardService implements IFreeBoardService {
 	}
 
 	@Override
-	public String delete(int bno) {
-		// 자식이 존재하면 삭제 못하게 하기
+	public String delete(int bno) throws Exception{
+		// 자식이 존재해도 삭제 가능하게 한다
 		FreeBoard board = mapper.getContent(bno);
 		FreeContentResponseDTO dto = new FreeContentResponseDTO(board);
-		if(dto.getAnswerNo() > 0) {
-			return "deleteFailCauseOfChild";
-		}
-		int parentPK = dto.getParentNo();
-		FreeBoard parentBoard = mapper.getContent(parentPK);
-		
-		// 부모의 자식 수 감소시키기
-		mapper.updateAnswerNo(parentPK, parentBoard.getAnswerNo()-1);
-		// 해당 자식 삭제하기
-		mapper.delete(bno);
-		return "deleteSuccess";
 
+		int parentPK = dto.getParentNo();
+		if(parentPK > 0) {
+			// 부모가 있다면 
+			FreeBoard parentBoard = mapper.getContent(parentPK);
+			
+			// 부모의 자식 수 감소시키기
+			mapper.updateAnswerNo(parentPK, parentBoard.getAnswerNo()-1);			
+		}
+		// 해당 자식의 자식이 존재한다면 내용 비우고 title '삭제된 글입니다' update
+		if(dto.getAnswerNo() > 0) {
+			mapper.updateWhenAnsExist(bno);
+		} else {
+			// 해당 자식의 자식이 존재하지 않는다면 해당 자식 delete
+			mapper.delete(bno);			
+		}
+		
+		return "deleteSuccess";			
+		
+	}
+
+	@Override
+	public void registFile(List<MultipartFile> list) {
+		System.out.println(list.toString());
+		
+		String uploadFolder = "C:/test/upload";
+		
+		LocalDateTime now = LocalDateTime.now();
+		DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyyMMdd");
+		String fileLoca = now.format(dtf);
+		
+		File f = new File(uploadFolder +"/"+fileLoca);
+		String p = uploadFolder +"/"+fileLoca;
+        if(!f.exists()) {
+			System.out.println("폴더가 존재하지 않음!");
+			f.mkdirs();
+		}
+
+		for(MultipartFile m : list) {
+			 try {
+				if(m.getSize() == 0) break;
+				
+				UUID uuid = UUID.randomUUID();
+				String fileName = uuid.toString();
+				fileName = fileName.replace("-", "");	
+				
+				String fileExtension = 
+						m.getOriginalFilename().substring(m.getOriginalFilename().lastIndexOf("."));
+				
+				File saveFile = new File(uploadFolder +"/"+fileLoca +"/"+fileName+fileExtension);
+				
+				m.transferTo(saveFile);
+				
+//				fileDAO.upload(fileName, m.getOriginalFilename(), p, 0);
+				
+			} catch (IllegalStateException | IOException e) {
+				e.printStackTrace();
+			} 
+			 
+		 }
+		//DB에 각각의 값을 저장하세요. (INSERT)
+        //uploadPath -> "C:/test/upload"
+        //fileLoca -> 날짜로 된 폴더명
+        //fileName -> 랜덤 파일명
+        //fileRealName -> 실제 파일명
+//        SnsBoard snsboard = SnsBoard.builder()
+//        							.writer(dto.getWriter())
+//        							.uploadPath(uploadPath)
+//        							.fileLoca(fileLoca)
+//        							.fileName(fileName+fileExtension)
+//        							.fileRealName(fileRealName)
+//        							.content(dto.getContent())
+//        							.build();
+//		mapper.insert(snsboard);
+		
 	}
 
 }

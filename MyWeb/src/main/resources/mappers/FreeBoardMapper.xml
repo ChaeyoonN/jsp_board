@@ -29,7 +29,7 @@
      	</if>
      </sql>
 	
-	<insert id="regist">
+	<insert id="regist"  useGeneratedKeys="true" keyProperty="bno">
 		INSERT INTO freeboard
 		(bno, title, writer, content, password, ref_no)
 		VALUES(
@@ -41,6 +41,17 @@
 		   #{refNo}
 		   )
 	</insert>
+	
+	<insert id="insertFile">
+    INSERT INTO file_info
+    (file_id, bno, file_path, file_name)
+    VALUES(
+        file_info_seq.NEXTVAL, 
+        #{bno},
+        #{filePath},
+        #{fileName})
+</insert>
+	
 	
 	<insert id="registAns">
 		INSERT INTO freeboard
@@ -145,5 +156,14 @@
 		DELETE FROM freeboard 
 		WHERE bno = #{bno}
 	</delete>
+	
+	<update id="updateWhenAnsExist">
+		UPDATE freeboard SET 
+		writer = '',
+		title = '삭제된 글입니다.', 
+		content = '', 
+		update_date = sysdate
+		WHERE bno = #{bno}
+	</update>
 
 </mapper>

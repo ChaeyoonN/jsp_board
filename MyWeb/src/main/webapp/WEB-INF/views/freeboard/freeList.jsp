@@ -77,20 +77,39 @@ a#listHome:hover{
                                     <!-- <td>${boardList.size() - status.index}</td> -->
 	                                <td style="display: none;">${vo.bno}</td>
 	                                <td>
-                                        <a href="${pageContext.request.contextPath}/freeboard/content?bno=${vo.bno}&pageNo=${pc.page.pageNo}&amount=${pc.page.amount}&keyword=${pc.page.keyword}&condition=${pc.page.condition}"
-                                    >
-                                        <c:if test="${vo.step > 0}">
-                                            <c:forEach var="i" begin="1" end="${vo.step}">
-                                                &nbsp;&nbsp;
-                                                <!-- <c:out value="&nbsp;&nbsp;" escapeXml="false" /> -->
-                                            </c:forEach>
-                                            <img style="display: inline-block;" src="${pageContext.request.contextPath}/img/reply-solid.png" />
-                                        </c:if>
-                                        <span>
-                                            <c:out value="${vo.title}" escapeXml="true" />
-                                            (<c:out value="${vo.commentCount}" escapeXml="true" />)
-                                        </span>
-                                        </a>
+                                        <c:choose>
+                                            <c:when test="${vo.writer != null}">
+                                            <a href="${pageContext.request.contextPath}/freeboard/content?bno=${vo.bno}&pageNo=${pc.page.pageNo}&amount=${pc.page.amount}&keyword=${pc.page.keyword}&condition=${pc.page.condition}"
+                                            >
+                                            <c:if test="${vo.step > 0}">
+                                                <c:forEach var="i" begin="1" end="${vo.step}">
+                                                    &nbsp;&nbsp;
+                                                </c:forEach>
+                                                <img style="display: inline-block;" src="${pageContext.request.contextPath}/img/reply-solid.png" />
+                                            </c:if>
+                                            <span>
+                                                <c:out value="${vo.title}" escapeXml="true" />
+                                                (<c:out value="${vo.commentCount}" escapeXml="true" />)
+                                            </span>
+                                            </a>
+                                            </c:when>
+                                            
+                                            <c:otherwise>
+                                            <span>
+                                                <c:if test="${vo.step > 0}">
+                                                    <c:forEach var="i" begin="1" end="${vo.step}">
+                                                        &nbsp;&nbsp;
+                                                    </c:forEach>
+                                                    <img style="display: inline-block;" src="${pageContext.request.contextPath}/img/reply-solid.png" />
+                                                </c:if>
+                                                <span>
+                                                    <c:out value="${vo.title}" escapeXml="true" />
+                                                    (<c:out value="${vo.commentCount}" escapeXml="true" />)
+                                                </span>
+                                            </span>
+                                        </c:otherwise>
+                                            
+                                        </c:choose>
                                     </td>
 	                                <td><c:out value="${vo.writer}" escapeXml="true" /></td>
 	                                <td>${vo.date}</td>
@@ -142,7 +161,11 @@ a#listHome:hover{
                                 <li><a href="#" data-pagenum="">끝</a></li>
 	                        </c:if>
 	                    </ul>
+                        <div style="display: flex; justify-content: flex-end;">
+                        <button type="button" style="margin-right: 7px;" class="btn btn-info list-btn" onclick="location.href='${pageContext.request.contextPath}/freeboard/freeList'">목록</button>
+                        
 	                    <button type="button" class="btn btn-info" onclick="location.href='${pageContext.request.contextPath}/freeboard/freeRegist'">글쓰기</button>
+                        </div>
                     </div>
 
                     <input type="hidden" name="pageNo" value="${pc.page.pageNo}">

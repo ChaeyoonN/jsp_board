@@ -40,7 +40,9 @@
 	
 	<update id="update">
 		UPDATE tbl_reply
-		SET reply_text = #{replyText}, update_date = sysdate
+		SET reply_writer = #{replyWriter}, 
+		reply_text = #{replyText}, 
+		update_date = sysdate
 		WHERE rno = #{rno}
 	</update>
 	

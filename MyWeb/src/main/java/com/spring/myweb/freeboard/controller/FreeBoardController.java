@@ -1,5 +1,7 @@
 package com.spring.myweb.freeboard.controller;
 
+import java.util.List;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -14,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.spring.myweb.freeboard.dto.page.Page;
@@ -21,6 +24,7 @@ import com.spring.myweb.freeboard.dto.page.PageCreator;
 import com.spring.myweb.freeboard.dto.request.FreeModifyRequestDTO;
 import com.spring.myweb.freeboard.dto.request.FreeRegistRequestDTO;
 import com.spring.myweb.freeboard.dto.response.FreeContentResponseDTO;
+import com.spring.myweb.freeboard.entity.FreeBoard;
 import com.spring.myweb.freeboard.service.IFreeBoardService;
 
 import lombok.RequiredArgsConstructor;
@@ -82,10 +86,23 @@ public class FreeBoardController {
 	
 	//글 등록 처리
 	@PostMapping("/freeRegist")
-	public String regist(FreeRegistRequestDTO dto) {
-		service.regist(dto);
+	public String regist(@RequestParam("writer") String writer,
+	        @RequestParam("password") String password,
+	        @RequestParam("title") String title,
+	        @RequestParam("content") String content,
+	        @RequestParam("file") List<MultipartFile> files) {
+		
+       service.regist(writer, password, title,  content, files);
+		
 		return "redirect:/freeboard/freeList";
 	}
+	
+//	@PostMapping("/freeRegist")
+//	public String regist(FreeRegistRequestDTO dto, @RequestParam("file") List<MultipartFile> file) {
+//		service.regist(dto);
+//		
+//		return "redirect:/freeboard/freeList";
+//	}
 	
 	//글 상세 보기
 	@GetMapping("/content") //"3번 글 상세 보기 요청을 넣으면 "컨트롤러는 DB에서 가지고 온 글 객체를 
@@ -171,14 +188,20 @@ public class FreeBoardController {
 	                     Model model) {
 	    System.out.println("/freeboard/realDelete: POST!");
 	    
-	    String msg = service.delete(bno);
-	    model.addAttribute("mes", msg);
-	    if(msg.equals("deleteFailCauseOfChild")) {
-	    	return "freeboard/freeDetail";
-	    } else {
-	    	return "redirect:/freeboard/freeList";
-	    }
-	    
+	    String msg = null;
+		try {
+			msg = service.delete(bno);
+			model.addAttribute("mes", msg);
+			
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		if(msg.equals("deleteSuccess")) {
+			return "redirect:/freeboard/freeList";	    	
+		} else {
+			return "freeboard/freeDetail";			
+		}
 	}
 	
 	//답변글쓰기 페이지를 열어주는 메서드

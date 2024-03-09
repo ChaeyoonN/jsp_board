@@ -7,7 +7,6 @@ uri="http://java.sun.com/jsp/jstl/functions" %>
   small.password-check {
     display: block; /* 블록 레벨 요소로 만들어 줍니다 (새 줄에서 시작) */
     font-size: 0.8em; /* 작은 글씨 크기 */
-    color: red;
     margin-top: 2px; /* 입력란과의 간격 */
     margin-bottom: 20px; /* 입력란과의 간격 */
   }
@@ -106,14 +105,7 @@ ${fn:escapeXml(board.content)}</textarea
                 name="inputPw"
                 placeholder="비밀번호 입력 후 버튼 클릭"
               />
-              <!-- <input
-                style="display: none"
-                id="deletePwInput"
-                class="form-control input-sm"
-                type="password"
-                name="inputPw"
-                placeholder="비밀번호를 치고 수정 또는 삭제 버튼 클릭"
-              /> -->
+
               <span style="display: none">
                 <button
                   type="button"
@@ -191,14 +183,27 @@ ${fn:escapeXml(board.content)}</textarea
           </div>
 
           <div class="reply-content">
-            <textarea class="form-control" rows="3" id="reply"></textarea>
-            <div class="reply-group">
+            <textarea
+              class="form-control"
+              rows="3"
+              id="reply"
+              placeholder="댓글은 300자 이내로 입력해주세요."
+              style="margin-bottom: 0"
+            ></textarea>
+            <div style="display: flex; margin-top: 0">
+              <span
+                id="content-count"
+                style="color: blue; margin: auto 0 0 auto"
+                >0</span
+              >/300
+            </div>
+            <div class="reply-group" style="display: flex">
               <div class="reply-input">
                 <input
                   type="text"
                   class="form-control"
                   id="replyId"
-                  placeholder="이름"
+                  placeholder="이름(10자 이내)"
                 />
                 <input
                   type="password"
@@ -206,9 +211,15 @@ ${fn:escapeXml(board.content)}</textarea
                   id="replyPw"
                   placeholder="비밀번호"
                 />
+                <small class="password-check"></small>
               </div>
 
-              <button type="button" id="replyRegist" class="right btn btn-info">
+              <button
+                type="button"
+                id="replyRegist"
+                class="right btn btn-info"
+                style="margin: auto 0 0 auto"
+              >
                 등록하기
               </button>
             </div>
@@ -236,6 +247,7 @@ ${fn:escapeXml(board.content)}</textarea
             </div>
           </div>
         </div>
+
         <button
           type="button"
           class="form-control"
@@ -270,11 +282,17 @@ ${fn:escapeXml(board.content)}</textarea
             class="form-control"
             rows="4"
             id="modalReply"
-            placeholder="내용입력"
+            placeholder="내용입력(300자 이내)"
           ></textarea>
           <div class="reply-group">
             <div class="reply-input">
               <input type="hidden" id="modalRno" />
+              <!-- 이름도 수정할 수 있게 하자 -->
+              <input
+                class="form-control"
+                id="modalReplyWriter"
+                placeholder="이름입력(10자 이내)"
+              />
               <input
                 type="password"
                 class="form-control"
@@ -329,6 +347,15 @@ ${fn:escapeXml(board.content)}</textarea
 
   let message;
   let bno = document.boardDetailForm.bno.value;
+
+  let boardAnsFlag = "${board.answerNo}"; //상세보기 중인 게시글의 자식 개수
+
+  // 삭제된 게시글일 경우 목록버튼만 보이도록 설정
+  if ($writer.value.length == 0 || $writer === "") {
+    document.querySelector(".btn-lines").style.display = "none";
+    pwCheckText.style.display = "none";
+    document.getElementById("ansBtn").style.display = "none";
+  }
 
   document.getElementById("ansBtn").onclick = function (e) {
     location.href =
@@ -412,12 +439,64 @@ ${fn:escapeXml(board.content)}</textarea
   document.getElementById("modifyBtn").onclick = function (e) {
     // message = "";
     // togglePasswordInput(e);
-    if (passwordInput.value !== null) {
-      pwCheck("modPage");
-    } else {
+    if (passwordInput.value === "") {
       alert("비밀번호를 입력해주세요!");
       return;
     }
+    if (passwordInput.value === null) {
+      alert("비밀번호를 입력해주세요!");
+      return;
+    }
+    if (passwordInput.value.length < 4 || passwordInput.value.length > 10) {
+      passwordInput.style.borderColor = "red";
+      passwordInput.style.color = "red";
+      document.querySelector("small.password-check").innerHTML =
+        "비밀번호는 4~10자리 입니다.";
+      // alert("비밀번호 자릿수를 맞춰 주세요.");
+      document.getElementById("modifyPwInput").value = "";
+      document.getElementById("modifyPwInput").focus();
+      return;
+    } else {
+      // 자릿수 통과
+      // 비번 정규식 조합 검증
+      if (!englishPattern.test(passwordInput.value)) {
+        pwCheckText.style.borderColor = "red";
+        pwCheckText.style.color = "red";
+        document.querySelector("small.password-check").innerHTML =
+          "비밀번호는 영문을 포함해야 합니다.";
+        // alert("비밀번호는 영문을 포함해야 합니다.");
+        document.getElementById("modifyPwInput").value = "";
+        document.getElementById("modifyPwInput").focus();
+        return;
+      }
+
+      if (!numberPattern.test(passwordInput.value)) {
+        pwCheckText.style.borderColor = "red";
+        pwCheckText.style.color = "red";
+        document.querySelector("small.password-check").innerHTML =
+          "비밀번호는 숫자를 포함해야 합니다.";
+        // alert("비밀번호는 숫자를 포함해야 합니다.");
+        document.getElementById("modifyPwInput").value = "";
+        document.getElementById("modifyPwInput").focus();
+        return;
+      }
+
+      if (!specialPattern.test(passwordInput.value)) {
+        pwCheckText.style.borderColor = "red";
+        pwCheckText.style.color = "red";
+        document.querySelector("small.password-check").innerHTML =
+          "비밀번호는 특수문자를 포함해야 합니다.";
+        // alert("비밀번호는 특수문자를 포함해야 합니다.");
+        document.getElementById("modifyPwInput").value = "";
+        document.getElementById("modifyPwInput").focus();
+        return;
+      }
+
+      if (regex.test(passwordInput.value)) {
+        pwCheck("delete");
+      }
+    }
+
     //키다운 이벤트
     passwordInput.onkeydown = function (e) {
       if (e.key === " ") {
@@ -433,41 +512,6 @@ ${fn:escapeXml(board.content)}</textarea
           // document.getElementById("password").focus();
           return;
         }
-        // 비범 정규식 조합 검증
-        // if (!englishPattern.test(password)) {
-        //   pwCheckText.style.borderColor = "red";
-        //   pwCheckText.style.color = "red";
-        //   document.querySelector(".password-check").innerHTML =
-        //     "적절한 형식의 비밀번호가 아닙니다.";
-        //   alert("비밀번호는 영문을 포함해야 합니다.");
-
-        //   document.getElementById("password").value = "";
-        //   document.getElementById("password").focus();
-        //   return;
-        // }
-
-        // if (!numberPattern.test(password)) {
-        //   pwCheckText.style.borderColor = "red";
-        //   pwCheckText.style.color = "red";
-        //   document.querySelector(".password-check").innerHTML =
-        //     "적절한 형식의 비밀번호가 아닙니다.";
-        //   alert("비밀번호는 숫자를 포함해야 합니다.");
-
-        //   document.getElementById("password").value = "";
-        //   document.getElementById("password").focus();
-        //   return;
-        // }
-
-        // if (!specialPattern.test(password)) {
-        //   pwCheckText.style.borderColor = "red";
-        //   pwCheckText.style.color = "red";
-        //   document.querySelector(".password-check").innerHTML =
-        //     "적절한 형식의 비밀번호가 아닙니다.";
-        //   alert("비밀번호는 특수문자를 포함해야 합니다.");
-        //   document.getElementById("password").value = "";
-        //   document.getElementById("password").focus();
-        //   return;
-        // }
 
         if (passwordInput.value.length < 4 || passwordInput.value.length > 10) {
           passwordInput.style.borderColor = "red";
@@ -478,10 +522,46 @@ ${fn:escapeXml(board.content)}</textarea
           document.getElementById("modifyPwInput").value = "";
           document.getElementById("modifyPwInput").focus();
           return;
-        }
+        } else {
+          // 자릿수 통과
+          // 비번 정규식 조합 검증
+          if (!englishPattern.test(passwordInput.value)) {
+            pwCheckText.style.borderColor = "red";
+            pwCheckText.style.color = "red";
+            document.querySelector("small.password-check").innerHTML =
+              "비밀번호는 영문을 포함해야 합니다.";
+            // alert("비밀번호는 영문을 포함해야 합니다.");
+            document.getElementById("modifyPwInput").value = "";
+            document.getElementById("modifyPwInput").focus();
+            return;
+          }
 
-        pwCheck("modPage");
-      }
+          if (!numberPattern.test(passwordInput.value)) {
+            pwCheckText.style.borderColor = "red";
+            pwCheckText.style.color = "red";
+            document.querySelector("small.password-check").innerHTML =
+              "비밀번호는 숫자를 포함해야 합니다.";
+            // alert("비밀번호는 숫자를 포함해야 합니다.");
+            document.getElementById("modifyPwInput").value = "";
+            document.getElementById("modifyPwInput").focus();
+            return;
+          }
+
+          if (!specialPattern.test(passwordInput.value)) {
+            pwCheckText.style.borderColor = "red";
+            pwCheckText.style.color = "red";
+            document.querySelector("small.password-check").innerHTML =
+              "비밀번호는 특수문자를 포함해야 합니다.";
+            // alert("비밀번호는 특수문자를 포함해야 합니다.");
+            document.getElementById("modifyPwInput").value = "";
+            document.getElementById("modifyPwInput").focus();
+            return;
+          }
+          if (regex.test(passwordInput.value)) {
+            pwCheck("modPage");
+          }
+        } // 자릿수 통과조건 끝
+      } // Enter
     }; // 키다운이벤트 끝
     // 블러 이벤트
     passwordInput.addEventListener("blur", pwCheck("modPage"));
@@ -492,9 +572,10 @@ ${fn:escapeXml(board.content)}</textarea
       //   "비밀번호가 일치합니다.";
       // if(pwCheckBtn.){ // 확인 클릭하면 }
       setTimeout(() => {
+        console.log("수정적용 요청함!");
         pwCheckBtn.onclick = location.href = // 수정페이지 이동
           "${pageContext.request.contextPath}/freeboard/freeModify?bno=" + bno;
-      }, 3000);
+      }, 2000);
     } else {
       // document.querySelector("small.password-check").style.color = "red";
       // document.querySelector("small.password-check").innerHTML =
@@ -506,18 +587,71 @@ ${fn:escapeXml(board.content)}</textarea
   document.getElementById("deleteBtn").onclick = function (e) {
     // message = "";
     // togglePasswordInput(e);
-    if (passwordInput.value !== null) {
-      pwCheck("delete");
-    } else {
+    if (passwordInput.value === "") {
       alert("비밀번호를 입력해주세요!");
       return;
     }
+    if (passwordInput.value === null) {
+      alert("비밀번호를 입력해주세요!");
+      return;
+    }
+    if (passwordInput.value.length < 4 || passwordInput.value.length > 10) {
+      passwordInput.style.borderColor = "red";
+      passwordInput.style.color = "red";
+      document.querySelector("small.password-check").innerHTML =
+        "비밀번호는 4~10자리 입니다.";
+      // alert("비밀번호 자릿수를 맞춰 주세요.");
+      document.getElementById("modifyPwInput").value = "";
+      document.getElementById("modifyPwInput").focus();
+      return;
+    } else {
+      // 자릿수 통과
+      // 비번 정규식 조합 검증
+      if (!englishPattern.test(passwordInput.value)) {
+        pwCheckText.style.borderColor = "red";
+        pwCheckText.style.color = "red";
+        document.querySelector("small.password-check").innerHTML =
+          "비밀번호는 영문을 포함해야 합니다.";
+        // alert("비밀번호는 영문을 포함해야 합니다.");
+        document.getElementById("modifyPwInput").value = "";
+        document.getElementById("modifyPwInput").focus();
+        return;
+      }
+
+      if (!numberPattern.test(passwordInput.value)) {
+        pwCheckText.style.borderColor = "red";
+        pwCheckText.style.color = "red";
+        document.querySelector("small.password-check").innerHTML =
+          "비밀번호는 숫자를 포함해야 합니다.";
+        // alert("비밀번호는 숫자를 포함해야 합니다.");
+        document.getElementById("modifyPwInput").value = "";
+        document.getElementById("modifyPwInput").focus();
+        return;
+      }
+
+      if (!specialPattern.test(passwordInput.value)) {
+        pwCheckText.style.borderColor = "red";
+        pwCheckText.style.color = "red";
+        document.querySelector("small.password-check").innerHTML =
+          "비밀번호는 특수문자를 포함해야 합니다.";
+        // alert("비밀번호는 특수문자를 포함해야 합니다.");
+        document.getElementById("modifyPwInput").value = "";
+        document.getElementById("modifyPwInput").focus();
+        return;
+      }
+      if (regex.test(passwordInput.value)) {
+        pwCheck("delete");
+      }
+    }
+
+    // 키다운 이벤트
     passwordInput.onkeydown = function (e) {
       if (e.key === " ") {
         e.preventDefault();
         alert("비밀번호에 공백을 사용할 수 없습니다.");
         return;
       }
+
       if (e.key === "Enter") {
         e.preventDefault();
         if (passwordInput.value === "" || passwordInput.value.includes(" ")) {
@@ -526,55 +660,56 @@ ${fn:escapeXml(board.content)}</textarea
           // document.getElementById("password").focus();
           return;
         }
-        // 비범 정규식 조합 검증
-        // if (!englishPattern.test(password)) {
-        //   pwCheckText.style.borderColor = "red";
-        //   pwCheckText.style.color = "red";
-        //   document.querySelector(".password-check").innerHTML =
-        //     "적절한 형식의 비밀번호가 아닙니다.";
-        //   alert("비밀번호는 영문을 포함해야 합니다.");
-
-        //   document.getElementById("password").value = "";
-        //   document.getElementById("password").focus();
-        //   return;
-        // }
-
-        // if (!numberPattern.test(password)) {
-        //   pwCheckText.style.borderColor = "red";
-        //   pwCheckText.style.color = "red";
-        //   document.querySelector(".password-check").innerHTML =
-        //     "적절한 형식의 비밀번호가 아닙니다.";
-        //   alert("비밀번호는 숫자를 포함해야 합니다.");
-
-        //   document.getElementById("password").value = "";
-        //   document.getElementById("password").focus();
-        //   return;
-        // }
-
-        // if (!specialPattern.test(password)) {
-        //   pwCheckText.style.borderColor = "red";
-        //   pwCheckText.style.color = "red";
-        //   document.querySelector(".password-check").innerHTML =
-        //     "적절한 형식의 비밀번호가 아닙니다.";
-        //   alert("비밀번호는 특수문자를 포함해야 합니다.");
-        //   document.getElementById("password").value = "";
-        //   document.getElementById("password").focus();
-        //   return;
-        // }
 
         if (passwordInput.value.length < 4 || passwordInput.value.length > 10) {
           passwordInput.style.borderColor = "red";
           passwordInput.style.color = "red";
-          document.querySelector(".password-check").innerHTML =
+          document.querySelector("small.password-check").innerHTML =
             "적절한 자릿수의 비밀번호가 아닙니다.";
           // alert("비밀번호 자릿수를 맞춰 주세요.");
           document.getElementById("modifyPwInput").value = "";
           document.getElementById("modifyPwInput").focus();
           return;
-        }
+        } else {
+          // 자릿수 통과
+          // 비번 정규식 조합 검증
+          if (!englishPattern.test(passwordInput.value)) {
+            pwCheckText.style.borderColor = "red";
+            pwCheckText.style.color = "red";
+            document.querySelector("small.password-check").innerHTML =
+              "비밀번호는 영문을 포함해야 합니다.";
+            // alert("비밀번호는 영문을 포함해야 합니다.");
+            document.getElementById("modifyPwInput").value = "";
+            document.getElementById("modifyPwInput").focus();
+            return;
+          }
 
-        pwCheck("delete");
-      }
+          if (!numberPattern.test(passwordInput.value)) {
+            pwCheckText.style.borderColor = "red";
+            pwCheckText.style.color = "red";
+            document.querySelector("small.password-check").innerHTML =
+              "비밀번호는 숫자를 포함해야 합니다.";
+            // alert("비밀번호는 숫자를 포함해야 합니다.");
+            document.getElementById("modifyPwInput").value = "";
+            document.getElementById("modifyPwInput").focus();
+            return;
+          }
+
+          if (!specialPattern.test(passwordInput.value)) {
+            pwCheckText.style.borderColor = "red";
+            pwCheckText.style.color = "red";
+            document.querySelector("small.password-check").innerHTML =
+              "비밀번호는 특수문자를 포함해야 합니다.";
+            // alert("비밀번호는 특수문자를 포함해야 합니다.");
+            document.getElementById("modifyPwInput").value = "";
+            document.getElementById("modifyPwInput").focus();
+            return;
+          }
+          if (regex.test(passwordInput.value)) {
+            pwCheck("delete");
+          }
+        } // 자릿수 통과조건 끝
+      } //  Enter
     }; // 키다운이벤트 끝
     // 블러 이벤트
     passwordInput.addEventListener("blur", pwCheck("delete"));
@@ -583,9 +718,14 @@ ${fn:escapeXml(board.content)}</textarea
       // document.querySelector("small.password-check").style.color = "green";
       // document.querySelector("small.password-check").innerHTML =
       //   "비밀번호가 일치합니다.";
-      if (!confirm("정말 삭제하시겠습니까?")) {
+      if (boardAnsFlag > 0) {
+        if (!confirm("답변이 존재하는 게시물입니다. 정말 삭제하시겠습니까?")) {
+          return;
+        }
+      } else if (!confirm("정말 삭제하시겠습니까?")) {
         return;
       }
+
       // var request = new XMLHttpRequest();
       //       request.open(
       //         "POST",
@@ -594,8 +734,14 @@ ${fn:escapeXml(board.content)}</textarea
       //       );
       // if(pwCheckBtn.){ // 확인 클릭하면 }
       setTimeout(() => {
+        console.log("삭제 요청함!");
         document.boardDetailForm.submit(); // 삭제 요청
-      }, 3000);
+      }, 2000);
+      // document.boardDetailForm.addEventListener("submit", (e) => {
+      //   e.preventDefault();
+      //   const payload = new FormData(e.target);
+      //   console.log([...payload]);
+      // });
 
       // request.onreadystatechange = function () {
       //   if (request.readyState === 4 && request.status === 200) {
@@ -609,6 +755,10 @@ ${fn:escapeXml(board.content)}</textarea
       //     }
       //   }
       // };
+      // const msg = "${mes}";
+      // const deletedBoard = "${delBoard}";
+      // console.log("deleted board: ", deletedBoard);
+      // console.log("msg: ", msg);
     } else {
       // document.querySelector("small.password-check").style.color = "red";
       // document.querySelector("small.password-check").innerHTML =
@@ -618,11 +768,11 @@ ${fn:escapeXml(board.content)}</textarea
 
   const msg = "${mes}";
   console.log("msg: ", msg);
-  if (msg === "deleteFailCauseOfChild") {
-    alert("답변이 달린 게시글은 삭제할 수 없습니다.");
-    window.location.href =
-      "${pageContext.request.contextPath}/freeboard/freeList";
-  }
+  // if (msg === "childExist") {
+  //   ("답변이 달린 게시글은 삭제할 수 없습니다.");
+  //   window.location.href =
+  //     "${pageContext.request.contextPath}/freeboard/freeList";
+  // }
 
   function togglePasswordInput(e) {
     if (passwordDiv.style.display === "none") {
@@ -683,30 +833,764 @@ ${fn:escapeXml(board.content)}</textarea
           //   "비밀번호가 일치하지 않습니다.";
           // alert("비밀번호가 일치하지 않습니다.");
         } else if (message === "pwCorrect") {
-          // document.querySelector("small.password-check").style.color = "green";
-          // document.querySelector("small.password-check").innerHTML =
-          //   "비밀번호가 일치합니다.";
+          document.querySelector("small.password-check").style.color = "green";
+          document.querySelector("small.password-check").innerHTML =
+            "비밀번호가 일치합니다.";
         } // 비번 일치하는 경우 끝
       } // 요청-응답 정상일때
     };
 
     request.send(data);
-  } // 서버에 요청해 비번 체크 함수 끝
+  } // 서버에 요청해 비번 체크하는 함수 끝
 
   /********** 댓글 ***********/
+
   window.onload = function () {
-    document.getElementById("replyRegist").onclick = () => {
-      console.log("댓글 등록이벤트가 발생함!");
+    const bno = "${board.bno}"; //현재 게시글 번호도 보내야 한다.
+    const replyTag = document.getElementById("reply");
+    let reply = document.getElementById("reply").value; // 댓글 내용
 
-      const bno = "${board.bno}"; //현재 게시글 번호도 보내야 한다.
-      const reply = document.getElementById("reply").value;
-      const replyId = document.getElementById("replyId").value;
-      const replyPw = document.getElementById("replyPw").value;
+    const contentCount = document.querySelector("#content-count"); // 글세기
 
-      if (reply === "" || replyId === "" || replyPw === "") {
-        alert("이름, 비밀번호, 내용은 필수 값입니다.");
+    const replyIdTag = document.getElementById("replyId");
+    let replyId = document.getElementById("replyId").value; // 댓글 작성자
+
+    const replyPwTag = document.getElementById("replyPw");
+    let replyPw = document.getElementById("replyPw").value; // 댓글 비번
+    const replyPwChk = document.getElementById("replyPw").nextElementSibling; // 댓글 비번 아래 글씨 small태그
+    // console.log(replyPwChk);
+    let pwFlag;
+    replyPwTag.style.borderColor = "#ccc";
+    replyPwChk.style.color = "black";
+    replyPwChk.textContent = "";
+
+    const replyModTag = document.getElementById("modalReply");
+    const replyMod = document.getElementById("modalReply").value;
+    const replyWriterTag = document.getElementById("modalReplyWriter");
+    const replyWriter = document.getElementById("modalReplyWriter").value;
+    const rno = document.getElementById("modalRno").value;
+    const replyPwModTag = document.getElementById("modalPw");
+    const replyPwMod = document.getElementById("modalPw").value;
+
+    const replyPwChkDefault =
+      "비밀번호는 영문, 숫자, 특수문자 조합 4~10자 이내로 입력";
+
+    replyPwTag.addEventListener("click", (e) => {
+      replyPwTag.style.borderColor = "black";
+      replyPwChk.style.color = "black";
+      if (e.target.value === "") {
+        replyPwChk.textContent = replyPwChkDefault;
+      } else {
+        if (e.target.value.length < 4 || e.target.value.length > 10) {
+          replyPwTag.focus();
+          // alert("비밀번호는 10자 이내여야 합니다.");
+          replyPwTag.style.borderColor = "red";
+          replyPwChk.style.color = "red";
+          replyPwChk.style.color = "red";
+          replyPwChk.innerHTML = "비밀번호는 4~10자 이내여야 합니다.";
+          var excess = e.target.value.replace(/\s/g, "").length - 10; // 초과하는 글자수 계산
+          e.target.value = e.target.value.slice(0, -excess);
+          pwFlag = false;
+          return;
+        }
+
+        if (!englishPattern.test(replyPwTag.value)) {
+          replyPwTag.style.borderColor = "red";
+          replyPwChk.style.color = "red";
+          replyPwChk.style.color = "red";
+          replyPwChk.innerHTML = "비밀번호는 영문을 포함해야 합니다.";
+          // alert("비밀번호는 영문을 포함해야 합니다.");
+          // replyPwTag.value = "";
+          replyPwTag.focus();
+          return;
+        } else if (!numberPattern.test(replyPwTag.value)) {
+          replyPwTag.style.borderColor = "red";
+          replyPwChk.style.color = "red";
+          replyPwChk.style.color = "red";
+          replyPwChk.innerHTML = "비밀번호는 숫자를 포함해야 합니다.";
+          // alert("비밀번호는 숫자를 포함해야 합니다.");
+          // replyPwTag.value = "";
+          replyPwTag.focus();
+          return;
+        } else if (!specialPattern.test(replyPwTag.value)) {
+          replyPwTag.style.borderColor = "red";
+          replyPwChk.style.color = "red";
+          replyPwChk.style.color = "red";
+          replyPwChk.innerHTML = "비밀번호는 특수문자를 포함해야 합니다.";
+          // replyPwTag.value = "";
+          replyPwTag.focus();
+          return;
+        } else if (regex.test(e.target.value)) {
+          replyPwTag.style.borderColor = "green";
+          // replyPwTag.style.color = "green";
+          replyPwChk.style.color = "green";
+          replyPwChk.innerHTML = "사용가능합니다.";
+          pwFlag = true;
+        }
+      }
+    });
+    replyPwTag.addEventListener("blur", (e) => {
+      replyPwTag.style.borderColor = "#ccc";
+      replyPwChk.style.color = "black";
+      replyPwChk.textContent = "";
+    });
+
+    replyIdTag.addEventListener("paste", function () {
+      console.log("이름 복붙에 대해 작동");
+      setTimeout(function () {
+        updateCount(replyIdTag, 10);
+      }, 0);
+    });
+    replyTag.addEventListener("paste", function () {
+      console.log("내용 복붙에 대해 작동");
+      setTimeout(function () {
+        updateCount(replyTag, 300, contentCount);
+        // updateCount(replyTag, 300, "#content-count");
+      }, 0);
+    });
+
+    replyWriterTag.addEventListener("paste", function () {
+      console.log("이름 복붙에 대해 작동");
+      setTimeout(function () {
+        updateCount2(replyWriterTag, 10);
+      }, 0);
+    });
+    updateCount2(replyWriterTag, 10);
+
+    replyModTag.addEventListener("paste", function () {
+      console.log("내용 복붙에 대해 작동");
+      setTimeout(function () {
+        updateCount(replyModTag, 300);
+        // updateCount(replyTag, 300, "#content-count");
+      }, 0);
+    });
+
+    // 문자열에서 공백과 줄바꿈을 제외한 글자수를 계산하는 함수입니다.
+    function countCharacters(str) {
+      return str.replace(/\s/g, "").length;
+    }
+
+    // 초과하는 글자수를 잘라내는 함수입니다.
+    function trimExcessCharacters(str, limit) {
+      const nonWhitespaceChars = str.match(/\S/g) || [];
+      if (nonWhitespaceChars.length > limit) {
+        const lastValidIndex = str.lastIndexOf(nonWhitespaceChars[limit - 1]);
+        return str.slice(0, lastValidIndex + 1);
+      }
+      return str;
+    }
+
+    // 입력란의 글자수를 계산하고 출력하는 함수입니다.
+    function updateCount(input, limit, countElement) {
+      // 입력란의 값에서 공백과 줄바꿈을 제외한 글자수를 계산합니다.
+      const count = countCharacters(input.value);
+
+      // 글자수가 제한을 초과하는 경우 알림을 띄우고 초과분을 제거합니다.
+      if (count > limit) {
+        alert("글자수가 제한을 초과했습니다. 초과분은 자동으로 제거됩니다.");
+        countElement.textContent = count;
+        input.value = trimExcessCharacters(input.value, limit);
+      } else {
+        // 글자수를 출력 요소에 표시합니다.
+        countElement.textContent = count;
+      }
+    }
+
+    function updateCount2(input, limit) {
+      // 입력란의 값에서 공백과 줄바꿈을 제외한 글자수를 계산합니다.
+      const count = countCharacters(input.value);
+
+      // 글자수가 제한을 초과하는 경우 알림을 띄우고 초과분을 제거합니다.
+      if (count > limit) {
+        alert("글자수가 제한을 초과했습니다. 초과분은 자동으로 제거됩니다.");
+
+        input.value = trimExcessCharacters(input.value, limit);
+      } else {
+        // 글자수를 출력 요소에 표시합니다.
+      }
+    }
+
+    // 이름
+    replyIdTag.onkeyup = (e) => {
+      if (anyBlank.test(e.target.value)) {
+        alert("이름에 공백은 허용하지 않습니다.");
+        replyIdTag.value = "";
+        replyIdTag.focus();
         return;
       }
+      if (blankPattern.test(e.target.value)) {
+        alert("이름은 공백으로 시작할 수 없습니다.");
+        replyIdTag.value = "";
+        replyIdTag.focus();
+        return;
+      }
+    };
+
+    replyWriterTag.onkeyup = (e) => {
+      if (anyBlank.test(e.target.value)) {
+        alert("이름에 공백은 허용하지 않습니다.");
+        e.target.value = "";
+        e.target.focus();
+        return;
+      }
+      if (blankPattern.test(e.target.value)) {
+        alert("이름은 공백으로 시작할 수 없습니다.");
+        e.target.value = "";
+        e.target.focus();
+        return;
+      }
+    };
+
+    replyIdTag.oninput = (e) => {
+      if (anyBlank.test(e.target.value)) {
+        e.preventDefault();
+        alert("이름에 공백은 허용하지 않습니다.!");
+        // replyIdTag.value = e.target.value.replace(/\s/g, "");
+        replyIdTag.value = "";
+        replyIdTag.focus();
+        return;
+      }
+
+      if (e.target.value.length > 10) {
+        alert("이름은 10자 이내여야 합니다.");
+        e.target.value = e.target.value.slice(0, 10);
+        return;
+      }
+
+      if (e.target.value.includes("개새끼")) {
+        alert("제목에 비속어가 감지되었습니다.");
+        replyIdTag.value = "";
+        replyIdTag.focus();
+        return;
+      }
+
+      if (e.target.value.replace(/\s/g, "").length > 10) {
+        alert("이름은 10자를 초과할 수 없습니다.");
+        var excess = e.target.value.replace(/\s/g, "").length - 10; // 초과하는 글자수 계산
+
+        e.target.value = e.target.value.slice(0, -excess);
+        return;
+      }
+    };
+
+    replyWriterTag.oninput = (e) => {
+      if (anyBlank.test(e.target.value)) {
+        e.preventDefault();
+        alert("이름에 공백은 허용하지 않습니다.!");
+        e.target.value = e.target.value.replace(/\s/g, "");
+        e.target.focus();
+        return;
+      }
+
+      if (e.target.value.length > 10) {
+        alert("이름은 10자 이내여야 합니다.");
+        e.target.value = e.target.value.slice(0, 10);
+        return;
+      }
+
+      if (e.target.value.includes("개새끼")) {
+        alert("제목에 비속어가 감지되었습니다.");
+        replyIdTag.value = "";
+        replyIdTag.focus();
+        return;
+      }
+
+      if (e.target.value.replace(/\s/g, "").length > 10) {
+        alert("이름은 10자를 초과할 수 없습니다.");
+        var excess = e.target.value.replace(/\s/g, "").length - 10; // 초과하는 글자수 계산
+
+        e.target.value = e.target.value.slice(0, -excess);
+        return;
+      }
+    };
+
+    //내용
+    replyTag.oninput = (e) => {
+      document.getElementById("content-count").innerText =
+        e.target.value.length;
+      // resize(e.target);
+
+      if (blankPattern.test(e.target.value)) {
+        alert("내용은 공백으로 시작할 수 없습니다.");
+        replyTag.value = "";
+        document.getElementById("content-count").innerText = 0;
+        replyTag.focus();
+        // resize(e.target);
+        return;
+      }
+
+      // if (e.target.value.length > 1000) {
+      //   alert("내용은 1000자를 초과할 수 없습니다.");
+      //   e.target.value = e.target.value.slice(0, 1000);
+      //   document.getElementById("count").innerText = e.target.value.length;
+      //   resize(e.target);
+      //   return;
+      // }
+
+      if (e.target.value.includes("개새끼")) {
+        alert("내용에 비속어는 쓸 수 없습니다.");
+        replyTag.value = "";
+        replyTag.focus();
+        return;
+      }
+    };
+
+    replyModTag.oninput = (e) => {
+      // document.getElementById("content-count").innerText =
+      //   e.target.value.length;
+      // resize(e.target);
+
+      if (blankPattern.test(e.target.value)) {
+        alert("내용은 공백으로 시작할 수 없습니다.");
+        e.target.value = "";
+        // document.getElementById("content-count").innerText = 0;
+        e.target.focus();
+        // resize(e.target);
+        return;
+      }
+
+      // if (e.target.value.length > 1000) {
+      //   alert("내용은 1000자를 초과할 수 없습니다.");
+      //   e.target.value = e.target.value.slice(0, 1000);
+      //   document.getElementById("count").innerText = e.target.value.length;
+      //   resize(e.target);
+      //   return;
+      // }
+
+      if (e.target.value.includes("개새끼")) {
+        alert("내용에 비속어는 쓸 수 없습니다.");
+        e.target.value = "";
+        e.target.focus();
+        return;
+      }
+    };
+
+    replyTag.oninput = (e) => {
+      setTimeout(function () {
+        document.getElementById("content-count").innerText =
+          e.target.value.replace(/\s/g, "").length;
+        // resize(e.target);
+
+        if (blankPattern.test(e.target.value)) {
+          alert("내용은 공백으로 시작할 수 없습니다.");
+          replyTag.value = "";
+          document.getElementById("content-count").innerText = 0;
+          replyTag.focus();
+          // resize(e.target);
+          return;
+        }
+
+        if (e.target.value.replace(/\s/g, "").length > 300) {
+          alert("내용은 300자 이내여야 합니다.");
+          var excess = e.target.value.replace(/\s/g, "").length - 300;
+          e.target.value = e.target.value.slice(0, -excess);
+          document.getElementById("content-count").innerText =
+            e.target.value.replace(/\s/g, "").length;
+          // resize(e.target);
+          return;
+        }
+
+        if (e.target.value.includes("개새끼")) {
+          alert("내용에 비속어는 쓸 수 없습니다.");
+          replyTag.value = "";
+          replyTag.focus();
+          return;
+        }
+      }, 0);
+    };
+
+    replyModTag.oninput = (e) => {
+      setTimeout(function () {
+        // document.getElementById("content-count").innerText =
+        //   e.target.value.replace(/\s/g, "").length;
+        // resize(e.target);
+
+        if (blankPattern.test(e.target.value)) {
+          alert("내용은 공백으로 시작할 수 없습니다.");
+          e.target.value = "";
+          // document.getElementById("content-count").innerText = 0;
+          e.target.focus();
+          // resize(e.target);
+          return;
+        }
+
+        if (e.target.value.replace(/\s/g, "").length > 300) {
+          alert("내용은 300자 이내여야 합니다.");
+          var excess = e.target.value.replace(/\s/g, "").length - 300;
+          e.target.value = e.target.value.slice(0, -excess);
+          // document.getElementById("content-count").innerText =
+          //   e.target.value.replace(/\s/g, "").length;
+          // resize(e.target);
+          return;
+        }
+
+        if (e.target.value.includes("개새끼")) {
+          alert("내용에 비속어는 쓸 수 없습니다.");
+          e.target.value = "";
+          e.target.focus();
+          return;
+        }
+      }, 0);
+    };
+
+    /*비밀번호 형식 검사 스크립트*/
+    replyPwTag.onkeyup = function (e) {
+      if (anyBlank.test(e.target.value)) {
+        replyPwTag.style.borderColor = "red";
+        replyPwChk.style.color = "red";
+        // alert("비밀번호는 공백이 없어야 합니다.");
+        replyPwChk.innerHTML = "공백은 비밀번호로 사용할 수 없습니다.";
+        replyPwChk.value = "";
+        replyPwChk.focus();
+        pwFlag = false;
+        return;
+      }
+      // 체크 공백
+      if (replyPwTag.value.includes(" ")) {
+        replyPwTag.style.borderColor = "red";
+        replyPwChk.style.color = "red";
+        replyPwChk.innerHTML = "공백은 비밀번호로 사용할 수 없습니다.";
+        replyPwChk.value = "";
+        // document.getElementById("password").focus();
+        // replyPwTag.value = replyPwTag.value.replace(" ", "");
+        replyPwTag.focus();
+        pwFlag = false;
+        return; // 공백이 있는 경우 아래의 코드를 실행하지 않는다.
+      }
+
+      // if (replyPw.length < 4 || replyPw.length > 10) {
+      //   replyPwTag.style.borderColor = "red";
+      //   replyPwChk.style.color = "red";
+      //   replyPwChk.innerHTML = "비밀번호의 글자수가 유효하지 않습니다.";
+      //   replyPw = "";
+      //   replyPwTag.focus();
+      //   pwFlag = false;
+      //   return;
+      // }
+
+      if (regex.test(replyPwTag.value)) {
+        replyPwTag.style.borderColor = "green";
+        replyPwChk.style.color = "green";
+        replyPwChk.innerHTML = "사용가능합니다.";
+        pwFlag = true;
+      }
+    };
+
+    replyPwTag.onkeyup = function (e) {
+      if (anyBlank.test(e.target.value)) {
+        replyPwTag.style.borderColor = "red";
+        replyPwChk.style.color = "red";
+        // alert("비밀번호는 공백이 없어야 합니다.");
+        replyPwChk.innerHTML = "공백은 비밀번호로 사용할 수 없습니다.";
+        replyPwChk.value = "";
+        replyPwChk.focus();
+        pwFlag = false;
+        return;
+      }
+      // 체크 공백
+      if (replyPwTag.value.includes(" ")) {
+        replyPwTag.style.borderColor = "red";
+        replyPwChk.style.color = "red";
+        replyPwChk.innerHTML = "공백은 비밀번호로 사용할 수 없습니다.";
+        replyPwChk.value = "";
+        // document.getElementById("password").focus();
+        // replyPwTag.value = replyPwTag.value.replace(" ", "");
+        replyPwTag.focus();
+        pwFlag = false;
+        return; // 공백이 있는 경우 아래의 코드를 실행하지 않는다.
+      }
+
+      // if (replyPw.length < 4 || replyPw.length > 10) {
+      //   replyPwTag.style.borderColor = "red";
+      //   replyPwChk.style.color = "red";
+      //   replyPwChk.innerHTML = "비밀번호의 글자수가 유효하지 않습니다.";
+      //   replyPw = "";
+      //   replyPwTag.focus();
+      //   pwFlag = false;
+      //   return;
+      // }
+
+      if (regex.test(replyPwTag.value)) {
+        replyPwTag.style.borderColor = "green";
+        replyPwChk.style.color = "green";
+        replyPwChk.innerHTML = "사용가능합니다.";
+        pwFlag = true;
+      }
+    };
+
+    replyPwTag.addEventListener("keydown", (e) => {
+      replyPwTag.style.borderColor = "#ccc";
+      replyPwChk.innerHTML = "";
+      if (e.key === " ") {
+        e.preventDefault();
+        // alert("비밀번호에 공백을 사용할 수 없습니다.");
+        replyPwChk.style.color = "red";
+        replyPwChk.innerHTML = "비밀번호에 공백을 사용할 수 없습니다.";
+        // passwordInput.value = "";
+        replyPwTag.focus();
+      }
+      if (e.target.value.replace(/\s/g, "") && e.target.value !== null) {
+        if (e.key === "Enter") {
+        }
+        if (e.key === "Backspace") {
+          replyPwTag.style.borderColor = "#ccc";
+          replyPwChk.innerHTML = "";
+        }
+        if (e.key === "Delete") {
+          replyPwTag.style.borderColor = "#ccc";
+          replyPwChk.innerHTML = "";
+        }
+      }
+      if (regex.test(replyPwTag.value)) {
+        replyPwTag.style.borderColor = "green";
+        replyPwChk.style.color = "green";
+        replyPwChk.innerHTML = "사용가능합니다.";
+        pwFlag = true;
+      }
+    });
+
+    replyPwTag.onblur = function (e) {
+      if (anyBlank.test(e.target.value)) {
+        replyPwTag.style.borderColor = "red";
+        replyPwTag.style.color = "red";
+        // alert("비밀번호는 공백이 없어야 합니다.");
+        replyPwChk.innerHTML = "공백은 비밀번호로 사용할 수 없습니다.";
+        replyPwTag.value = "";
+        replyPwTag.focus();
+        pwFlag = false;
+        return;
+      }
+
+      if (regex.test(replyPwTag.value)) {
+        replyPwTag.style.borderColor = "green";
+        replyPwChk.style.color = "green";
+        replyPwChk.innerHTML = "사용가능합니다.";
+        pwFlag = true;
+      }
+    };
+
+    document.getElementById("modalPw").oninput = (e) => {
+      if (e.target.value === " ") {
+        e.preventDefault();
+        alert("공백은 비밀번호로 사용할 수 없습니다.");
+        e.target.value = "";
+        e.target.focus();
+        return;
+      }
+      if (anyBlank.test(e.target.value)) {
+        e.preventDefault();
+        alert("공백은 비밀번호로 사용할 수 없습니다.");
+        e.target.value = e.target.value.replace(/\s/g, "");
+        e.target.focus();
+        return;
+      }
+    };
+
+    //비밀번호 유효성 검사(크기제한)
+    replyPwTag.oninput = (e) => {
+      replyPwTag.style.borderColor = "#ccc";
+      replyPwTag.style.color = "black";
+      replyPwChk.style.color = "black";
+      replyPwChk.innerHTML = "";
+      if (replyPwTag.value === " ") {
+        replyPwTag.style.borderColor = "red";
+        replyPwChk.style.color = "red";
+        replyPwChk.style.color = "red";
+        replyPwChk.innerHTML = "공백은 비밀번호로 사용할 수 없습니다.";
+        e.target.value = "";
+        e.target.focus();
+        pwFlag = false;
+        return;
+      }
+      if (anyBlank.test(e.target.value)) {
+        // alert("비밀번호는 공백이 없어야 합니다.");
+        replyPwTag.style.borderColor = "red";
+        replyPwChk.style.color = "red";
+        replyPwChk.style.color = "red";
+        replyPwChk.innerHTML = "공백은 비밀번호로 사용할 수 없습니다.";
+        e.target.value = "";
+        e.target.focus();
+        pwFlag = false;
+        return;
+      }
+
+      if (e.target.value.length < 4 || e.target.value.length > 10) {
+        replyPwTag.focus();
+        // alert("비밀번호는 10자 이내여야 합니다.");
+        replyPwTag.style.borderColor = "red";
+        replyPwChk.style.color = "red";
+        replyPwChk.style.color = "red";
+        replyPwChk.innerHTML = "비밀번호는 4~10자 이내여야 합니다.";
+        var excess = e.target.value.replace(/\s/g, "").length - 10; // 초과하는 글자수 계산
+        e.target.value = e.target.value.slice(0, -excess);
+        pwFlag = false;
+        return;
+      }
+
+      if (!englishPattern.test(replyPwTag.value)) {
+        replyPwTag.style.borderColor = "red";
+        replyPwChk.style.color = "red";
+        replyPwChk.style.color = "red";
+        replyPwChk.innerHTML = "비밀번호는 영문을 포함해야 합니다.";
+        // alert("비밀번호는 영문을 포함해야 합니다.");
+        // replyPwTag.value = "";
+        replyPwTag.focus();
+        return;
+      } else if (!numberPattern.test(replyPwTag.value)) {
+        replyPwTag.style.borderColor = "red";
+        replyPwChk.style.color = "red";
+        replyPwChk.style.color = "red";
+        replyPwChk.innerHTML = "비밀번호는 숫자를 포함해야 합니다.";
+        // alert("비밀번호는 숫자를 포함해야 합니다.");
+        // replyPwTag.value = "";
+        replyPwTag.focus();
+        return;
+      } else if (!specialPattern.test(replyPwTag.value)) {
+        replyPwTag.style.borderColor = "red";
+        replyPwChk.style.color = "red";
+        replyPwChk.style.color = "red";
+        replyPwChk.innerHTML = "비밀번호는 특수문자를 포함해야 합니다.";
+        // replyPwTag.value = "";
+        replyPwTag.focus();
+        return;
+      } else if (regex.test(e.target.value)) {
+        replyPwTag.style.borderColor = "green";
+        // replyPwTag.style.color = "green";
+        replyPwChk.style.color = "green";
+        replyPwChk.innerHTML = "사용가능합니다.";
+        pwFlag = true;
+      }
+
+      // if (e.target.value.includes("개새끼")) {
+      //   alert("비밀번호는 비속어를 허용하지 않습니다.");
+      //   document.getElementById("password").value = "";
+      //   document.getElementById("password").focus();
+      //   return;
+      // }
+    };
+
+    document.getElementById("replyRegist").onclick = () => {
+      console.log("댓글 등록이벤트가 발생함!");
+      console.log(replyTag.value);
+      ///
+      console.log("내용 길이", replyTag.value.replace(/\s/g, "").length);
+      console.log("이름 길이", replyIdTag.value.replace(/\s/g, "").length);
+      console.log("비밀번호 길이", replyPwTag.value.replace(/\s/g, "").length);
+
+      //유효성 검사
+      if (replyTag.value === "") {
+        alert("내용은 필수값입니다.");
+        replyTag.value = "";
+        document.getElementById("content-count").innerText = 0;
+        replyTag.focus();
+        return;
+      }
+
+      if (replyTag.value.trim() === "") {
+        alert("내용에 공백만 작성할 수 없습니다.");
+        replyTag.value = "";
+        document.getElementById("content-count").innerText = 0;
+        replyTag.focus();
+        return;
+      }
+
+      if (replyTag.value.includes("개새끼")) {
+        alert("내용에 비속어가 감지되었습니다.");
+        replyTag.value = "";
+        replyTag.focus();
+        return;
+      }
+
+      if (replyIdTag.value === "") {
+        alert("이름은 필수값입니다.");
+        replyIdTag.value = "";
+        replyIdTag.focus();
+        return;
+      }
+
+      if (anyBlank.test(replyIdTag.value)) {
+        alert("이름에 공백은 쓸 수 없습니다.");
+        replyIdTag.value = "";
+        replyIdTag.focus();
+        return;
+      }
+
+      if (replyIdTag.value.includes("개새끼")) {
+        alert("이름에 비속어를 포함할 수 없습니다.");
+        replyIdTag.value = "";
+        replyIdTag.focus();
+        return;
+      }
+
+      if (replyPwTag.value === "") {
+        replyPwTag.style.borderColor = "red";
+        replyPwTag.style.color = "red";
+        // replyPwChk.innerHTML =
+        //   "적절한 형식의 비밀번호가 아닙니다.";
+        alert("비밀번호는 필수값입니다.");
+        replyPwTag.value = "";
+        replyPwTag.focus();
+        return;
+      }
+
+      if (replyPwTag.value.trim() === "") {
+        replyPw.style.borderColor = "red";
+        replyPw.style.color = "red";
+        // document.querySelector(".password-check").innerHTML =
+        //   "적절한 형식의 비밀번호가 아닙니다.";
+        alert("비밀번호에 공백은 쓸 수 없습니다.");
+        replyPwTag.value = "";
+        replyPwTag.focus();
+        return;
+      }
+
+      // if (!englishPattern.test(replyPwTag.value)) {
+      //   replyPwTag.style.borderColor = "red";
+      //   replyPwTag.style.color = "red";
+      //   replyPwChk.innerHTML = "적절한 형식의 비밀번호가 아닙니다.";
+      //   alert("비밀번호는 영문을 포함해야 합니다.");
+
+      //   replyPwTag.value = "";
+      //   replyPwTag.focus();
+      //   return;
+      // }
+
+      // if (!numberPattern.test(replyPwTag.value)) {
+      //   replyPwTag.style.borderColor = "red";
+      //   replyPwTag.style.color = "red";
+      //   replyPwChk.innerHTML = "적절한 형식의 비밀번호가 아닙니다.";
+      //   alert("비밀번호는 숫자를 포함해야 합니다.");
+
+      //   replyPwTag.value = "";
+      //   replyPwTag.focus();
+      //   return;
+      // }
+
+      // if (!specialPattern.test(replyPwTag.value)) {
+      //   replyPwTag.style.borderColor = "red";
+      //   replyPwTag.style.color = "red";
+      //   replyPwChk.innerHTML = "적절한 형식의 비밀번호가 아닙니다.";
+      //   alert("비밀번호는 특수문자를 포함해야 합니다.");
+      //   replyPwTag.value = "";
+      //   replyPwTag.focus();
+      //   return;
+      // }
+
+      // if (replyPwTag.value.length < 4 || replyPwTag.value.length > 10) {
+      //   replyPwTag.style.borderColor = "red";
+      //   replyPwTag.style.color = "red";
+      //   replyPwChk.innerHTML = "적절한 형식의 비밀번호가 아닙니다.";
+      //   alert("비밀번호 자릿수를 맞춰 주세요.");
+      //   replyPwTag.value = "";
+      //   replyPwTag.focus();
+      //   return;
+      // }
+
+      if (!pwFlag) {
+        alert("비밀번호가 적절한 형식인지 확인해주세요.");
+        return;
+      }
+      ///
 
       //요청에 관련된 정보 객체
       const reqObj = {
@@ -716,9 +1600,9 @@ ${fn:escapeXml(board.content)}</textarea
         },
         body: JSON.stringify({
           bno: bno,
-          replyText: reply,
-          replyId: replyId,
-          replyPw: replyPw,
+          replyText: replyTag.value,
+          replyId: replyIdTag.value,
+          replyPw: replyPwTag.value,
         }),
       };
 
@@ -730,6 +1614,10 @@ ${fn:escapeXml(board.content)}</textarea
           document.getElementById("reply").value = "";
           document.getElementById("replyId").value = "";
           document.getElementById("replyPw").value = "";
+          replyPwTag.style.borderColor = "#ccc";
+          replyPwTag.style.color = "black";
+          replyPwChk.style.color = "black";
+          replyPwChk.innerHTML = "";
 
           //등록 완료 후 댓글 목록 함수를 호출해서 비동기식으로 목록 표현.
           getList(1, true);
@@ -756,6 +1644,15 @@ ${fn:escapeXml(board.content)}</textarea
     //비동기 방식이기 때문에 페이지가 그대로 계속 머물면서 댓글이 밑에 쌓입니다.
     //때에 따라서는 댓글을 계속 누적시키는 것이 아닌, 화면을 초기화하고 새롭게 보여줘야 할 때가 있다.
     //reset -> true: 페이지를 리셋해서 새롭게 그려내기, reset -> false:  누적해서 쌓기.
+    /***** html태그등 안먹게 하는 함수 ******/
+    function htmlEntities(str) {
+      return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+    }
+
     function getList(pageNum, reset) {
       console.log("getList() 호출됨!");
 
@@ -808,8 +1705,8 @@ ${fn:escapeXml(board.content)}</textarea
                                 <div class='reply-content'>
                                     <div class='reply-group'>
                                         <strong class='left'>` +
-              replyList[i].replyWriter +
-              `</strong> 
+              htmlEntities(replyList[i].replyWriter) +
+              `</strong>
                                         <small class='left'>` +
               parseTime(replyList[i].date) +
               `</small>
@@ -821,7 +1718,7 @@ ${fn:escapeXml(board.content)}</textarea
               `' class='right replyModify'><span class='glyphicon glyphicon-pencil'></span>수정</a>
                                     </div>
                                     <p class='clearfix'>` +
-              replyList[i].replyText +
+              htmlEntities(replyList[i].replyText) +
               `</p>
                                 </div>
                             </div>`;
@@ -846,11 +1743,11 @@ ${fn:escapeXml(board.content)}</textarea
                 console.log('수정 버튼 이벤트 발생!');
             } (이거 동작 안함!!!!!!!!!!!!)
 
-            - .replyModify 요소는 실제 존재하는 요소가 아니라 
-            비동기 통신을 통해 생성되는 요소입니다. 
-            그러다 보니 이벤트가 등록되는 시점보다 fetch함수의 실행이 먼저 끝날 것이라는 
+            - .replyModify 요소는 실제 존재하는 요소가 아니라
+            비동기 통신을 통해 생성되는 요소입니다.
+            그러다 보니 이벤트가 등록되는 시점보다 fetch함수의 실행이 먼저 끝날 것이라는
             보장이 없기 때문에 해당 방식은 이벤트 등록이 불가능합니다.
-            
+
             이 때는 이미 실제로 존재하는 #replyList에 이벤트를 등록하고, 이벤트를 자식에게 위임하여
             사용하는 addEventListener를 통해 처리해야 합니다.
             */
@@ -873,6 +1770,9 @@ ${fn:escapeXml(board.content)}</textarea
       //댓글 내용도 가져와서 모달에 뿌려주자.
       const content = e.target.parentNode.nextElementSibling.textContent;
       console.log("댓글 내용: ", content);
+      // 댓글 작성자도 가져와서 모달에 뿌려주자
+      const writer = e.target.parentNode.firstElementChild.textContent;
+      console.log("글쓴이: ", writer);
 
       //3. 모달 창 하나를 이용해서 상황에 맞게 수정 / 삭제 모달을 제공해야 한다.
       //조건문을 작성 (수정 or 삭제에 따라 모달 디자인을 조정)
@@ -880,7 +1780,10 @@ ${fn:escapeXml(board.content)}</textarea
         //수정 버튼을 눌렀으므로 수정 모달 형식으로 꾸며주겠다.
         document.querySelector(".modal-title").textContent = "댓글 수정"; // 제목 설정
         document.getElementById("modalReply").style.display = "inline"; // 댓글 내용 보이기
+        document.getElementById("modalReplyWriter").style.display = "inline"; // 댓글 작성자 보이기
+
         document.getElementById("modalReply").value = content; // 댓글 내용
+        document.getElementById("modalReplyWriter").value = writer; // 댓글 작성자
         document.getElementById("modalModBtn").style.display = "inline";
         document.getElementById("modalDelBtn").style.display = "none";
 
@@ -889,6 +1792,7 @@ ${fn:escapeXml(board.content)}</textarea
       } else {
         document.querySelector(".modal-title").textContent = "댓글 삭제"; // 제목 설정
         document.getElementById("modalReply").style.display = "none"; // 댓글 내용 숨기기
+        document.getElementById("modalReplyWriter").style.display = "none"; // 댓글 작성자 숨기기
         document.getElementById("modalModBtn").style.display = "none";
         document.getElementById("modalDelBtn").style.display = "inline";
 
@@ -899,11 +1803,20 @@ ${fn:escapeXml(board.content)}</textarea
     //수정 처리 함수. (수정 모달을 열어서 수정 내용을 작성한 후 수정 버튼을 클릭했을 때)
     document.getElementById("modalModBtn").onclick = () => {
       const reply = document.getElementById("modalReply").value;
+      const replyWriter = document.getElementById("modalReplyWriter").value;
       const rno = document.getElementById("modalRno").value;
       const replyPw = document.getElementById("modalPw").value;
 
-      if (reply === "" || replyPw === "") {
-        alert("내용, 비밀번호를 확인하세요!");
+      if (reply === "" || replyPw === "" || replyWriter === "") {
+        alert("이름, 내용, 비밀번호를 입력하세요!");
+        return;
+      }
+      if (
+        reply.trim() === "" ||
+        replyPw.trim() === "" ||
+        replyWriter.trim() === ""
+      ) {
+        alert("이름, 내용, 비밀번호를 입력하세요!");
         return;
       }
 
@@ -915,6 +1828,7 @@ ${fn:escapeXml(board.content)}</textarea
         },
         body: JSON.stringify({
           replyText: reply,
+          replyWriter: replyWriter,
           replyPw: replyPw,
         }),
       };
@@ -942,7 +1856,7 @@ ${fn:escapeXml(board.content)}</textarea
     document.getElementById("modalDelBtn").onclick = () => {
       /*
                 1. 모달창에 rno값, replyPw 값을 얻습니다.
-                
+
                 2. fetch 함수를 이용해서 DELETE 방식으로 reply/{rno} 요청
 
                 3. 서버에서는 요청을 받아서 비밀번호를 확인하고, 비밀번호가 맞으면
@@ -956,8 +1870,13 @@ ${fn:escapeXml(board.content)}</textarea
       const rno = document.getElementById("modalRno").value;
       const replyPw = document.getElementById("modalPw").value;
 
-      if (replyPw === "") {
-        alert("비밀번호를 확인하세요!");
+      if (replyPw === "" || replyPw.trim() === "") {
+        alert("비밀번호를 입력하세요!");
+        document.getElementById("modalPw").focus();
+        return;
+      }
+
+      if (!confirm("정말 삭제하시겠습니까?")) {
         return;
       }
 

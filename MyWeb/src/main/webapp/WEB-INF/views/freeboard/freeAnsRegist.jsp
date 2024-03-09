@@ -43,7 +43,7 @@ prefix="c" %> <%@ include file="../include/header.jsp" %>
           </p>
         </div>
 
-        <form method="post" name="boardForm">
+        <form method="post" name="boardForm" enctype="multipart/form-data">
           <table class="table">
             <tbody class="t-control">
               <tr style="display: none">
@@ -127,6 +127,8 @@ prefix="c" %> <%@ include file="../include/header.jsp" %>
               </tr>
             </tbody>
           </table>
+          <input type="file" name="file" />
+          <hr />
           <div class="titlefoot">
             <button type="button" id="reg" class="btn">답변등록</button>
             <button
